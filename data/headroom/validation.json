@@ -1,0 +1,27 @@
+{
+ "clauses": 143,
+ "cases": 1064,
+ "skipped": {
+  "fin_117351": "no comfortable draw at 20000630",
+  "fin_166338": "no comfortable draw at 20150331",
+  "fin_166982": "no comfortable draw at 20161231",
+  "fin_17084": "no comfortable draw at 20000630",
+  "fin_182948": "no comfortable draw at 20041231",
+  "fin_190914": "no comfortable draw at 19971231",
+  "fin_219887": "no comfortable draw at 20000630"
+ },
+ "kinds": {
+  "headroom": 925,
+  "missing": 138,
+  "flag_on": 1
+ },
+ "status": {
+  "breach": 370,
+  "comply": 556,
+  "undetermined": 138
+ },
+ "cushion_asked": 745,
+ "capacity_asked": 718,
+ "validation_correct": 1064,
+ "validation_mismatches": []
+}

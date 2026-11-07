@@ -1,0 +1,25 @@
+{
+  "validation": "passed",
+  "source_records": 12517,
+  "split_counts": {
+    "train_unlabeled": 10016,
+    "validation": 1251,
+    "test": 1250
+  },
+  "contract_overlap": 0,
+  "normalized_exact_text_overlap": 0,
+  "grpo_real_unlabeled_prompts": 10016,
+  "accepted_sft_pairs": 206,
+  "held_out_records_in_sft": 0,
+  "reference_status_counts": {
+    "validation": {
+      "not_yet_reviewed": 1251
+    },
+    "test": {
+      "model_reviewed_not_gold": 48,
+      "verification_failed_or_needs_context": 52,
+      "not_yet_reviewed": 1150
+    }
+  },
+  "limitation": "Checks establish data integrity and solver validity, not gold semantic correctness."
+}

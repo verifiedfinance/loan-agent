@@ -1,0 +1,22 @@
+{
+ "clauses": 533,
+ "kept": 163,
+ "kept_borrowers": 113,
+ "excluded": 370,
+ "exclusion_reasons": {
+  "reader A": 171,
+  "no earnings or debt item": 113,
+  "readers disagree": 62,
+  "reader B": 18,
+  "schedule date 1998-01-01 not in the text": 1,
+  "schedule date 2008-01-01 not in the text": 1,
+  "threshold 1.0": 1,
+  "threshold 0": 1,
+  "schedule date 2012-01-01 not in the text": 1,
+  "threshold 2.15": 1
+ },
+ "with_earnings": 109,
+ "with_debt": 109,
+ "with_schedule": 27,
+ "multi_limit": 42
+}

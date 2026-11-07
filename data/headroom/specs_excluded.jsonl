@@ -1,0 +1,370 @@
+{"id": "fin_02331", "reason": "reader A: unsupported - The Tangible Net Worth minimum in 4.09(a) is not a fixed number. It is 85% of Tangible Net Worth at the closing date, plus 75% of cumulative positive "}
+{"id": "fin_02790", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_03568", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_03570", "reason": "readers disagree"}
+{"id": "fin_03608", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_03610", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_04091", "reason": "reader A: unsupported - The Minimum Net Worth covenant in Section 6.27(b) has a threshold that depends on other quantities: $186,000,000 plus 80.0% of the Consolidated Net Wo"}
+{"id": "fin_04182", "reason": "readers disagree"}
+{"id": "fin_04183", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_07728", "reason": "readers disagree"}
+{"id": "fin_100191", "reason": "reader A: unsupported - The Section 8.14(b) net worth minimum is not a fixed number. It equals $100,000,000 plus 50% of cumulative Consolidated Positive Net Income plus 100% "}
+{"id": "fin_100362", "reason": "reader A: unsupported - Section 5.01 contains only affirmative covenants (compliance, insurance, taxes, reporting, etc.). The financial covenants in Sections 5.03(a)-(c) (Tot"}
+{"id": "fin_100363", "reason": "reader A: unsupported - Section 5.02 is a set of negative covenants (limits on liens, debt baskets, mergers, asset sales, restricted payments and so on), not a financial main"}
+{"id": "fin_100364", "reason": "reader A: unsupported - Two of the three covenants have thresholds that depend on other quantities. The debt-to-capitalization limit is 42.5% minus a variable Ratio Reduction"}
+{"id": "fin_100429", "reason": "reader A: unsupported - The clause includes a liquidity covenant in Section 7.05(d) whose threshold is $350,000,000 minus amounts paid for Conversion Price under the Indentur"}
+{"id": "fin_102061", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_102062", "reason": "reader A: unsupported - The Section 7.1(b) thresholds (37.5% before the second anniversary of the Closing Date, 35% on or after it) are keyed to the Closing Date. The clause "}
+{"id": "fin_104321", "reason": "reader A: unsupported - The Capital Expenditures limit in (a) is not a fixed schedule. Thirty-three percent of any unused amount in one period is added to the next period's l"}
+{"id": "fin_108393", "reason": "readers disagree"}
+{"id": "fin_108395", "reason": "readers disagree"}
+{"id": "fin_110402", "reason": "readers disagree"}
+{"id": "fin_110403", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_112005", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_112028", "reason": "reader A: unsupported - The Minimum Adjusted Tangible Net Worth threshold is not a fixed number. It starts at $5,000,000 and rises each month by 75% of Net Income, so it depe"}
+{"id": "fin_112085", "reason": "reader B: unsupported - Test dates in a schedule cannot be pinned to calendar dates"}
+{"id": "fin_113565", "reason": "reader A: unsupported - The Funded Debt to EBITDA and Liabilities to Tangible Net Worth schedules are keyed to 'Fiscal Year Ending' 1997, 1998, 1999 and so on. The clause doe"}
+{"id": "fin_113611", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_113612", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_113613", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_113614", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_115647", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_116005", "reason": "reader A: unsupported - The Consolidated Net Worth covenant in 7.11(c) has a threshold that depends on other quantities: 90% of Consolidated Net Worth as of June 30, 1997, pl"}
+{"id": "fin_116539", "reason": "reader A: unsupported - The clause cannot be reduced to a complete spec. The first covenant (the $22,000,000 / $17,000,000 / $16,500,000 / $15,000,000 schedule) never names t"}
+{"id": "fin_117118", "reason": "readers disagree"}
+{"id": "fin_117119", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_117772", "reason": "readers disagree"}
+{"id": "fin_119344", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_119345", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_119811", "reason": "readers disagree"}
+{"id": "fin_119813", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_120411", "reason": "reader A: unsupported - Covenant 7.02(d) tests the arithmetic mean of per-market ratios (Consolidated Operating Cash Flow to gross revenue for each Commercialized Market). Th"}
+{"id": "fin_120812", "reason": "reader A: unsupported - Section 8.16 is a negative covenant restricting encumbrances on subsidiaries' ability to pay dividends, make loans or transfer assets. It contains no "}
+{"id": "fin_122035", "reason": "readers disagree"}
+{"id": "fin_124328", "reason": "readers disagree"}
+{"id": "fin_124745", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_124746", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_124747", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_124748", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_125922", "reason": "reader A: unsupported - The clause has numeric financial covenants, but some cannot be expressed as fixed limits. The Tangible Net Worth minimum steps by 'first year' and 'ea"}
+{"id": "fin_127592", "reason": "readers disagree"}
+{"id": "fin_128320", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_128322", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_129014", "reason": "reader A: unsupported - The Tangible Net Worth covenant in 4.9(b) has no fixed threshold. It is set relative to Borrower's actual Tangible Net Worth at fiscal year end 2010 ("}
+{"id": "fin_129612", "reason": "reader A: unsupported - Section 6.01(b) sets a minimum cash and Permitted Investments level of $300,000,000 plus the maximum aggregate amount of Indebtedness or other obligat"}
+{"id": "fin_130771", "reason": "reader A: unsupported - Section 5.1 contains only affirmative covenants (reporting, maintenance, insurance, taxes, etc.). The financial ratio tests are in Section 5.3, which "}
+{"id": "fin_130773", "reason": "reader A: unsupported - Several thresholds depend on other quantities rather than fixed numbers. The Total Liabilities limit is a sum of percentages of balance-sheet items an"}
+{"id": "fin_132009", "reason": "reader A: unsupported - The Minimum Tangible Net Worth threshold after the quarter ending April 30, 2011 is the $1,200,000 Base Line Amount plus 25% of aggregate quarterly po"}
+{"id": "fin_132569", "reason": "reader A: unsupported - The Minimum Tangible Net Worth threshold in Section 6.14(c) is not a fixed number. It starts at $42,000,000 and is then adjusted each fiscal year by a"}
+{"id": "fin_132632", "reason": "reader A: unsupported - The clause contains only negative covenants on mergers and asset sales; it has no numeric financial covenant with a threshold. The only ratio mentione"}
+{"id": "fin_132645", "reason": "reader A: unsupported - The clause contains only negative covenants on mergers and asset sales; it has no numeric financial covenant. The only ratio is a cross-reference to S"}
+{"id": "fin_132736", "reason": "readers disagree"}
+{"id": "fin_132974", "reason": "schedule date 1998-01-01 not in the text"}
+{"id": "fin_133343", "reason": "readers disagree"}
+{"id": "fin_133344", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_135733", "reason": "reader A: unsupported - Section 8.3.3 sets Senior Interest Coverage Ratio thresholds by recurring fiscal quarter-end (March 31, June 30, September 30, December 31) with no ye"}
+{"id": "fin_135774", "reason": "reader A: unsupported - Section 8.02 is a set of negative covenants (debt, lien, distribution and other restrictions) with fixed-dollar baskets, such as Cdn. $5,000,000 for p"}
+{"id": "fin_135775", "reason": "reader B: no parseable output"}
+{"id": "fin_137148", "reason": "readers disagree"}
+{"id": "fin_138906", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_138935", "reason": "schedule date 2008-01-01 not in the text"}
+{"id": "fin_139245", "reason": "reader A: unsupported - Several covenants in this clause have thresholds that depend on other quantities. Section 9.11 (Minimum Consolidated Net Worth) is 85% of Consolidated"}
+{"id": "fin_140871", "reason": "reader A: unsupported - Section 6.01 contains only affirmative covenants (reporting, books and records, maintenance, insurance, use of proceeds). It sets no numeric financial"}
+{"id": "fin_143636", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_143879", "reason": "reader A: unsupported - Clause 9.10(d) sets the Capital Expenditures limits by reference to Schedule IV, which is not included, so those thresholds and their test dates canno"}
+{"id": "fin_144073", "reason": "reader A: unsupported - The clause has no financial covenant whose test dates can be pinned to calendar dates. The only numeric tests are the minimum Capital Expenditures by "}
+{"id": "fin_144074", "reason": "reader A: unsupported - The Tangible Net Worth minimum in Section 7.2.4(e) is $55,000,000 plus 50% of cumulative Net Income, so the threshold depends on another quantity. The"}
+{"id": "fin_14442", "reason": "readers disagree"}
+{"id": "fin_145393", "reason": "reader A: unsupported - Section 6.31.2 (Minimum Tangible Net Worth) sets a threshold that depends on other quantities: $87,500,000 plus 75% of Consolidated Net Income plus 10"}
+{"id": "fin_145846", "reason": "reader A: unsupported - The clause is an affirmative covenant on servicing agreements (compliance, notice, and delivery of acknowledgments) and contains no numeric financial "}
+{"id": "fin_148438", "reason": "readers disagree"}
+{"id": "fin_148542", "reason": "reader A: unsupported - The minimum Consolidated Adjusted Tangible Net Worth threshold in 6.20(b) depends on other quantities ($325,000,000 plus 50% of Consolidated Net Incom"}
+{"id": "fin_148598", "reason": "readers disagree"}
+{"id": "fin_149257", "reason": "reader A: unsupported - The minimum Consolidated Tangible Net Worth threshold depends on another quantity: $372,000,000 plus 85% of net cash proceeds from equity offerings af"}
+{"id": "fin_149398", "reason": "reader A: unsupported - The first interest coverage test period starts on the 'Closing Date', which the clause does not give as a calendar date, so the schedule's test dates "}
+{"id": "fin_150993", "reason": "reader A: unsupported - Section 8.04 is a negative covenant on acquisitions, not a single numeric financial covenant. It permits acquisitions under any of three alternative b"}
+{"id": "fin_151007", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_151008", "reason": "readers disagree"}
+{"id": "fin_152897", "reason": "readers disagree"}
+{"id": "fin_154153", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_154154", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_154161", "reason": "reader A: unsupported - The minimum Tangible Effective Net Worth threshold depends on other quantities (US$160,000,000 plus 70% of cumulative Consolidated Net Income plus 100"}
+{"id": "fin_155212", "reason": "readers disagree"}
+{"id": "fin_155213", "reason": "readers disagree"}
+{"id": "fin_155214", "reason": "readers disagree"}
+{"id": "fin_155636", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_157757", "reason": "reader A: unsupported - This clause is a negative covenant restricting optional payments on, and amendments to, the Senior Subordinated Notes. It has no maintenance financial"}
+{"id": "fin_157828", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_158517", "reason": "readers disagree"}
+{"id": "fin_159748", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_161541", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_163195", "reason": "readers disagree"}
+{"id": "fin_164046", "reason": "readers disagree"}
+{"id": "fin_164193", "reason": "reader A: unsupported - Section 5.8.3 sets the Minimum Shareholders' Equity threshold at $104,018,000 plus 50% of quarterly Consolidated Net Income and 100% of Net Cash Proce"}
+{"id": "fin_164530", "reason": "readers disagree"}
+{"id": "fin_16850", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_168577", "reason": "reader A: unsupported - The Section 6.8(c) capital expenditure limit does not have a fixed threshold. Under clause (ii), unused capex from one fiscal year (up to 50% of that "}
+{"id": "fin_169487", "reason": "reader A: unsupported - Section 7.11(c), Minimum Tangible Net Worth, sets its threshold as 80% of Tangible Net Worth at a reference date plus 80% of Net Cash Proceeds from la"}
+{"id": "fin_171138", "reason": "reader A: unsupported - The Effective Tangible Net Worth covenant has a threshold that depends on other quantities ($60,000,000 plus 75% of net proceeds of equity/Subordinate"}
+{"id": "fin_171981", "reason": "reader A: unsupported - The clause cannot be expressed in this spec for three reasons. (1) The Titan Indemnity earnings threshold for fiscal years 1996 and 1997 is written as"}
+{"id": "fin_172005", "reason": "readers disagree"}
+{"id": "fin_172020", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_172865", "reason": "reader A: unsupported - Section 5.10 is a use-of-proceeds covenant, not an ongoing financial maintenance covenant. The only numeric figures are conditions on Revolving Loan p"}
+{"id": "fin_172868", "reason": "reader A: unsupported - Section 5.13 is a subsidiary-designation covenant, not a numeric financial covenant. Its only ratio test (Net Senior Secured Leverage Ratio no greater"}
+{"id": "fin_173443", "reason": "reader B: unsupported - The clause defines the threshold as a percentage (45%) but does not specify the denominator or the specific ratio (e.g., Leverage Ratio vs. Debt/EBITD"}
+{"id": "fin_173444", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_175120", "reason": "reader B: no parseable output"}
+{"id": "fin_175499", "reason": "readers disagree"}
+{"id": "fin_177125", "reason": "reader A: unsupported - Section 10 contains only affirmative covenants (inspections, reporting, insurance, taxes, etc.). Its numeric figures are triggers for inspection and a"}
+{"id": "fin_177126", "reason": "reader A: unsupported - The only financial covenants are in Section 10.2.11. The Minimum Consolidated EBITDA covenant is tested against a 'Minimum Consolidated EBITDA Require"}
+{"id": "fin_177599", "reason": "reader A: unsupported - The minimum Net Worth covenant in Section 5.19(j) has a threshold that depends on another quantity. After any equity offering, the minimum becomes $40"}
+{"id": "fin_181266", "reason": "threshold 1.0 (ratio) not found in the text"}
+{"id": "fin_182314", "reason": "readers disagree"}
+{"id": "fin_183359", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_185821", "reason": "reader A: unsupported - The minimum Consolidated Tangible Net Worth covenant in Section 5.13(e) has a threshold that depends on another quantity: $20,000,000 plus 50% of cumu"}
+{"id": "fin_186382", "reason": "reader A: unsupported - Section 6.11(c) Minimum Liquidity sets its threshold as the sum of the Aggregate Commitment and the outstanding Incremental Term Loans, so the thresho"}
+{"id": "fin_186814", "reason": "reader A: unsupported - The Minimum Tangible Net Worth covenant (6.22.3) has a threshold that depends on other quantities: after December 31, 2000 it is the prior quarter's m"}
+{"id": "fin_187076", "reason": "reader A: unsupported - The 0.55 to 1 limit is numeric, but once Appraisals are obtained under Section 5.4 the denominator becomes the lesser of two amounts: Capitalization V"}
+{"id": "fin_187079", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_187485", "reason": "reader A: unsupported - The test dates cannot be pinned to calendar dates. The clause does not say when the fiscal year ends, so the 1996 and 1997 fiscal years have no calend"}
+{"id": "fin_189426", "reason": "reader A: unsupported - Section 5.02 is a list of negative covenants, not a single financial ratio or level test. The only period-based numeric limits are lease obligations a"}
+{"id": "fin_189428", "reason": "reader A: unsupported - The clause cannot be turned into a fixed numeric spec for two reasons. (1) The Net Worth floor is the Consolidated Net Worth at the end of Q3 of Fisca"}
+{"id": "fin_190164", "reason": "reader A: unsupported - The Tangible Net Worth covenant in 5.5(d) has a threshold that depends on another quantity: $13,500,000 plus 50% of cumulative annual consolidated net"}
+{"id": "fin_190235", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_190443", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_190444", "reason": "readers disagree"}
+{"id": "fin_191145", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_192461", "reason": "reader A: unsupported - The part (b) schedule ends with a step for the 'Term Loan Maturity Date', which the clause does not tie to a calendar date. The test dates in the sche"}
+{"id": "fin_192720", "reason": "reader A: unsupported - The 55% and 50% thresholds are tied to the first year after the Conversion Date, and the clause gives no calendar date for it. The test dates in the s"}
+{"id": "fin_193460", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_193461", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_194530", "reason": "reader A: unsupported - Covenant (b) sets the minimum Consolidated Net Worth threshold as a function of other quantities (Consolidated Net Worth at September 30, 1997 plus 50"}
+{"id": "fin_19596", "reason": "reader A: unsupported - The Minimum Net Worth covenant has a threshold that depends on another quantity ($85,000,000 plus 50% of cumulative Net Income from the Closing Date)."}
+{"id": "fin_196397", "reason": "reader A: unsupported - The Section 6.01(d) Capital Expenditures limit has a threshold that depends on other quantities. For fiscal years after 2002 it is $6,000,000 plus 50%"}
+{"id": "fin_19641", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_200228", "reason": "reader B: no parseable output"}
+{"id": "fin_200308", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_203961", "reason": "readers disagree"}
+{"id": "fin_204739", "reason": "reader A: unsupported - The thresholds are keyed to 'Fiscal Year' and 'Fiscal Quarter' (e.g. 1999 First, Second), but the clause does not say when the Borrower's fiscal year "}
+{"id": "fin_204921", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_205136", "reason": "reader A: unsupported - Two covenants have thresholds that depend on other quantities. Section 5.10(iii) sets the minimum Net Cash Level at the outstanding principal balance "}
+{"id": "fin_206222", "reason": "reader A: unsupported - The clause cannot be reduced to fixed numeric limits. The capital expenditure covenants (6.7(d), (i), (m)) list thresholds with no fiscal years attach"}
+{"id": "fin_208866", "reason": "reader A: unsupported - The Consolidated Tangible Net Worth threshold depends on other quantities ($101,000,000 plus 50% of consolidated net income plus 100% of net proceeds "}
+{"id": "fin_213809", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_214879", "reason": "reader B: unsupported - Thresholds for Working Capital (4.1(a)), Quick Ratio (4.1(c)), and Profit after taxes (4.1(f)) are redacted (N/A)."}
+{"id": "fin_215894", "reason": "reader A: unsupported - The Net Worth covenant in 4.9(c) has a threshold that depends on other quantities: $35,000,000 plus 80% of trailing four-quarter net income, plus 100%"}
+{"id": "fin_216449", "reason": "reader B: no parseable output"}
+{"id": "fin_216508", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_216509", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_216512", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_219238", "reason": "reader A: unsupported - The Tangible Net Worth minimum is not a fixed number: the threshold depends on other quantities. It is $23,000,000 plus 50% of proceeds from equity sa"}
+{"id": "fin_221396", "reason": "reader A: unsupported - The clause cannot be fully specified. The U.S. Sales Revenue thresholds are in Schedule 6.3(a), which is not given. The interest coverage steps (1.50:"}
+{"id": "fin_221797", "reason": "reader A: unsupported - The clause has no standalone numeric covenant. It is a conditional alternative-compliance (cure) provision for covenants 6.3, 6.6 and 6.7, whose own t"}
+{"id": "fin_221993", "reason": "readers disagree"}
+{"id": "fin_222793", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_223475", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_224036", "reason": "readers disagree"}
+{"id": "fin_224550", "reason": "reader A: unsupported - The Book Net Worth covenant in Section 5.05(d) has a threshold that depends on other quantities: $375,000,000 plus 75% of equity offerings after the C"}
+{"id": "fin_225003", "reason": "reader A: unsupported - The Minimum Net Worth covenant in 6.16(d) sets its later thresholds as Net Worth as of July 31, 1996 plus a scheduled amount. That makes the threshold"}
+{"id": "fin_225083", "reason": "readers disagree"}
+{"id": "fin_225570", "reason": "reader B: no parseable output"}
+{"id": "fin_226226", "reason": "readers disagree"}
+{"id": "fin_226820", "reason": "reader A: unsupported - The Minimum Tangible Net Worth threshold depends on other quantities (50% of cumulative Consolidated net income and 100% of cumulative net proceeds of"}
+{"id": "fin_226965", "reason": "reader A: unsupported - The Minimum Tangible Net Worth threshold in 6.10(c) depends on other quantities: $559,347,000 plus 50% of cumulative Consolidated net income and 100% "}
+{"id": "fin_227024", "reason": "reader A: unsupported - The Reserve Maintenance Test in 9.01(c) sets a 375 Bcfe minimum that is reduced by the proved Bcfe attributable to any Oil and Gas Property sold, adju"}
+{"id": "fin_229428", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_229764", "reason": "reader A: unsupported - Section 6.13(e) sets the Minimum Net Worth threshold as 90% of Net Worth at March 31, 1997 plus 50% of Net Income from each subsequent fiscal quarter "}
+{"id": "fin_229966", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_23187", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_232634", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_234436", "reason": "reader A: unsupported - The maximum operating loss thresholds for the quarters ending 3/31/01, 6/30/01 and 9/30/01 are blank (redacted) in the clause, so the covenant cannot "}
+{"id": "fin_236879", "reason": "readers disagree"}
+{"id": "fin_241259", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_241311", "reason": "readers disagree"}
+{"id": "fin_241404", "reason": "readers disagree"}
+{"id": "fin_241405", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_241406", "reason": "reader A: unsupported - The covenant applies only from 180 days after the Closing Date. The clause does not give the Closing Date, so the start of the test period cannot be p"}
+{"id": "fin_245291", "reason": "reader A: unsupported - The Minimum Net Worth covenant in 7.20(b)(ii) has a threshold that depends on other quantities: 75% of Net Worth at December 28, 2002, plus 50% of pos"}
+{"id": "fin_249133", "reason": "reader A: unsupported - The thresholds are tied to specific test dates in 1997 (3.25:1 at quarter and year ends, 4.00:1 at 10/31 and 11/30). For later years the clause says o"}
+{"id": "fin_249534", "reason": "reader A: unsupported - The Capital Expenditures limit has no fixed threshold after fiscal year 2003. For fiscal year 2004 and thereafter the amount is 'to be established by "}
+{"id": "fin_251745", "reason": "readers disagree"}
+{"id": "fin_252991", "reason": "readers disagree"}
+{"id": "fin_252992", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_25369", "reason": "reader A: unsupported - The threshold schedule is keyed to 'Fiscal Year' 1997, 1998, 1999 and 2000 and thereafter. The clause does not give the fiscal year-end, so the quarte"}
+{"id": "fin_25370", "reason": "reader A: unsupported - The threshold schedule is keyed to 'Fiscal Year' 1997, 1998, 1999 and 2000 and thereafter. The clause does not give the Borrower's fiscal year-end, so"}
+{"id": "fin_25442", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_255811", "reason": "reader A: unsupported - The financial covenants in Section 7.2.4 are tested on schedules keyed to fiscal quarters after the Conversion Date (FQ1, FQ2, and so on), and the cla"}
+{"id": "fin_25957", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_25958", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_26029", "reason": "reader A: unsupported - Section 8.13(a) has a threshold that depends on another quantity. The proviso lets the Leverage Ratio exceed 6.5:1.0 up to the lesser of the computed "}
+{"id": "fin_263387", "reason": "reader A: unsupported - The numeric thresholds are not stated in the clause; they are set out in Schedules 5.09(a), 5.09(c), 5.09(d) and 5.09(e), which are not provided, and "}
+{"id": "fin_263858", "reason": "reader A: unsupported - The clause contains affirmative covenants only (existence, taxes, reporting, leases, alterations, etc.) and no financial maintenance covenant with a n"}
+{"id": "fin_264219", "reason": "reader A: unsupported - The Debt Service Coverage Ratio test start date is the earlier of Borrower's Cash at Bank falling below $20,000,000 or September 30, 2006. That depend"}
+{"id": "fin_265165", "reason": "readers disagree"}
+{"id": "fin_266499", "reason": "reader A: unsupported - The Revenue covenant in 6.7(b) sets its threshold by reference to another quantity (revenue in each previous fiscal quarter), not a fixed number. The "}
+{"id": "fin_26826", "reason": "reader A: unsupported - The minimum Adjusted Consolidated Tangible Net Worth covenant in Section 7.2.4(a) sets its threshold from 01/01/95 onward at $130,000,000 plus 25% of "}
+{"id": "fin_26838", "reason": "reader A: unsupported - The minimum Adjusted Consolidated Tangible Net Worth covenant in Section 7.2.4(a) has a threshold that depends on another quantity. From 01/01/95 onwa"}
+{"id": "fin_26889", "reason": "readers disagree"}
+{"id": "fin_268922", "reason": "reader A: unsupported - The Tangible Net Worth threshold after 3/31/04 depends on other quantities (the $4,000,000 base plus 50% of cumulative quarterly net income and 100% o"}
+{"id": "fin_26894", "reason": "reader A: unsupported - This is a negative covenant restricting mergers, asset transfers and acquisitions, not a numeric financial covenant. The only figures are exceptions t"}
+{"id": "fin_269463", "reason": "reader A: unsupported - The thresholds are keyed to 'Annual Fiscal Period' 2003 through 2007 and thereafter, and the clause does not define these as calendar dates, so the te"}
+{"id": "fin_269464", "reason": "reader A: unsupported - The ratio thresholds are keyed to 'Annual Fiscal Period' 2003, 2004, etc. The clause does not define those periods, so the schedule's test dates canno"}
+{"id": "fin_269507", "reason": "reader A: unsupported - The threshold schedule is keyed to 'fiscal quarters' of 1999-2006, and the clause does not give the fiscal year-end, so the test dates cannot be pinne"}
+{"id": "fin_269508", "reason": "reader A: unsupported - The threshold schedule is keyed to 'fiscal quarters' (e.g. 'First fiscal quarter 1999') and the clause does not define the fiscal year or quarter-end "}
+{"id": "fin_269978", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_271689", "reason": "reader A: unsupported - Section 8.1(d) (Minimum Cash Retained Earnings) sets its thresholds as sums that depend on other quantities: $175,000,000 or $156,000,000 plus percent"}
+{"id": "fin_271698", "reason": "reader A: unsupported - Section 8.10 restricts payments on and modifications of subordinated debt. It has no standalone numeric financial covenant to test. The only numeric f"}
+{"id": "fin_271958", "reason": "reader A: unsupported - The threshold schedule depends on 'the second and third fiscal quarters of 2008', but the clause does not give Parent Guarantor's fiscal year-end, so "}
+{"id": "fin_271960", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_272617", "reason": "reader A: unsupported - The Consolidated Leverage Ratio schedule is cut off. No ratio is given for the period beginning October 31, 2008 and each fiscal quarter thereafter, s"}
+{"id": "fin_273844", "reason": "reader A: unsupported - The clause only sets out a procedure for calculating and reporting the ratio referred to in Clause X(1); it contains no numeric financial covenant or "}
+{"id": "fin_274157", "reason": "reader A: unsupported - The covenant starts on the last day of the first full fiscal quarter after the 'Triggering Date'. That date is not given in the clause, so the test da"}
+{"id": "fin_274522", "reason": "reader A: unsupported - The clause is a negative covenant restricting mergers and asset transfers. It has no fixed numeric financial covenant with a pinned threshold. The pro"}
+{"id": "fin_276727", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_277964", "reason": "reader A: unsupported - Section 8.13(b), the Clean Down Period, requires Loans to be reduced to $2,000,000 or less for at least 30 consecutive days in each fiscal quarter. Th"}
+{"id": "fin_278142", "reason": "readers disagree"}
+{"id": "fin_278406", "reason": "reader A: unsupported - The Minimum Tangible Net Worth covenant (6.17.3) has a threshold that depends on other quantities: $44,000,000 plus 50% of quarterly Net Income plus 7"}
+{"id": "fin_279583", "reason": "threshold 0 (usd) not found in the text"}
+{"id": "fin_281141", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_282853", "reason": "reader B: no parseable output"}
+{"id": "fin_283104", "reason": "reader A: unsupported - The Section 10.2(12)(c) minimum Equity covenant has a threshold that depends on other quantities: C$185 million plus 50% of positive quarterly consoli"}
+{"id": "fin_283358", "reason": "reader A: unsupported - Several thresholds cannot be expressed as fixed schedules. The minimum EBITDA in 10.6.4 is $35,000,000 plus or minus 50% of the EBITDA Adjustment for "}
+{"id": "fin_283664", "reason": "reader A: unsupported - Section 11.8 is a restriction on amending or prepaying Subordinated Debt, not a maintenance covenant with a financial threshold. The Senior Leverage R"}
+{"id": "fin_284552", "reason": "readers disagree"}
+{"id": "fin_285063", "reason": "reader B: no parseable output"}
+{"id": "fin_285196", "reason": "reader A: unsupported - The Minimum Net Worth covenant (6.19.2) has a threshold that depends on other quantities: 75% of Consolidated Net Worth at December 31, 2010, plus 50%"}
+{"id": "fin_286275", "reason": "reader A: unsupported - The clause cannot be reduced to one unambiguous spec. The minimum availability test switches on quarter-end days to a different measure (Qualified Cas"}
+{"id": "fin_287342", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_288426", "reason": "reader A: unsupported - The clause is a ratings-maintenance covenant (maintain debt ratings from Moody's and S&P) and does not set a numeric financial covenant limit. The 3.5"}
+{"id": "fin_288438", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_288462", "reason": "reader B: no parseable output"}
+{"id": "fin_288919", "reason": "reader A: unsupported - The clause contains affirmative covenants (notices, environmental compliance, collateral/mortgage delivery, reserve reports, property maintenance, swa"}
+{"id": "fin_289052", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_289075", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_29180", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_292344", "reason": "reader A: unsupported - The clause contains redaction markers ('* * *') inside the minimum EBITDA schedule, right after the June 30, 2014 figure. It also redacts text in the "}
+{"id": "fin_292731", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_294513", "reason": "reader A: unsupported - The clause is an affirmative covenant on reporting and delivery of certificates and information (Section 12.2). It contains no numeric financial coven"}
+{"id": "fin_294585", "reason": "schedule date 2012-01-01 not in the text"}
+{"id": "fin_294891", "reason": "reader B: unsupported - The threshold for the Fixed Asset Coverage covenant (Section 7.15(e)) is defined as a percentage of a variable quantity (Acquisition/Term Outstandings"}
+{"id": "fin_296395", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_297938", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_298986", "reason": "reader A: unsupported - The ratio's denominator is EBITDA scaled by a different factor in each test period (x4, x2, x4/3, then x1). The spec format only allows item weights o"}
+{"id": "fin_300731", "reason": "readers disagree"}
+{"id": "fin_300732", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_301067", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_30177", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_30187", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_304831", "reason": "reader A: unsupported - The Consolidated Net Worth minimum is not a fixed threshold. It is $81,600,000 plus 75% of accumulated Consolidated Net Income plus 100% of Net Procee"}
+{"id": "fin_305881", "reason": "readers disagree"}
+{"id": "fin_306180", "reason": "readers disagree"}
+{"id": "fin_306263", "reason": "readers disagree"}
+{"id": "fin_306738", "reason": "readers disagree"}
+{"id": "fin_307343", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_307344", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_308797", "reason": "reader A: unsupported - The 1.0:1.0 minimum applies only from February 28, 2013. From February 28, 2014 the threshold is to be set by the Agent from the Business Plan, with a"}
+{"id": "fin_309303", "reason": "reader A: unsupported - The threshold schedule cannot be pinned to calendar dates. The first step runs 'from closing through Fiscal year end 2004', but the closing date is no"}
+{"id": "fin_310064", "reason": "reader A: unsupported - Section 5.02 is mainly a set of negative covenants (liens, debt, asset sales, investments, restricted payments) with basket limits, not periodic finan"}
+{"id": "fin_310606", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_311949", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_312646", "reason": "reader A: unsupported - Section 7.12(g) sets the Consolidated Tangible Net Worth minimum as $30,000,000 plus 85% of Net Proceeds of Equity Issuances after the Closing Date, s"}
+{"id": "fin_312695", "reason": "reader A: unsupported - Section 7.12(d) sets the Consolidated Tangible Net Worth minimum at $65,000,000 plus 85% of Net Proceeds of Equity Issuances after the Closing Date. T"}
+{"id": "fin_312855", "reason": "reader A: unsupported - This clause is a list of negative covenants (liens, debt, mergers, asset sales, investments, restricted payments and others). It has no financial main"}
+{"id": "fin_312857", "reason": "reader B: no parseable output"}
+{"id": "fin_313101", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_313155", "reason": "reader A: unsupported - The Current Ratio and Total Debt to EBITDAX covenants (and the first step of the Total Debt to EBITDAX schedule) start on the \"first Redetermination D"}
+{"id": "fin_313527", "reason": "reader A: unsupported - The 6.12(c) Capital Expenditures limit does not have a fixed threshold. The annual dollar cap is increased by 50% of the prior year's unused Carry-Ove"}
+{"id": "fin_314647", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_315328", "reason": "reader A: unsupported - The clause is a negative covenant restricting Sale Leaseback Transactions, with conditions that reference other sections (fixed charge coverage ratio "}
+{"id": "fin_315980", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_318127", "reason": "reader A: unsupported - The clause cannot be reduced to fixed numeric limits. The Consolidated Debt Service Coverage Ratio threshold steps from 2.50 to 3.50 after the 'Term L"}
+{"id": "fin_318901", "reason": "reader A: unsupported - Section 9.01 contains only affirmative information/reporting covenants (financial statements, budgets, certificates, notices). It sets no numeric fina"}
+{"id": "fin_318923", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_318930", "reason": "readers disagree"}
+{"id": "fin_319544", "reason": "readers disagree"}
+{"id": "fin_320396", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_320708", "reason": "reader A: unsupported - The 3.75:1.00 maximum Leverage Ratio is not a fixed schedule. It rises by 0.50 (capped at 4.25) after qualifying acquisitions, which depend on conside"}
+{"id": "fin_323331", "reason": "readers disagree"}
+{"id": "fin_323728", "reason": "readers disagree"}
+{"id": "fin_32379", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_324113", "reason": "reader A: unsupported - Section 6.06 is a negative covenant restricting restrictive agreements. It has no financial ratio or level covenant tested against a numeric threshold"}
+{"id": "fin_325205", "reason": "reader A: unsupported - The Consolidated Tangible Net Worth covenant in Section 9.01(c) has a threshold that depends on another quantity: $65,000,000 plus 50% of positive Con"}
+{"id": "fin_326175", "reason": "reader A: unsupported - The threshold schedule cannot be tied to calendar dates. The fiscal-year labels are missing from the table, which shows only a 'N/A' row, a 'Thereafte"}
+{"id": "fin_326602", "reason": "reader A: unsupported - The fiscal-year labels for most rows of both threshold schedules are missing from the clause text. Only '2016 and thereafter' and '2018 and thereafter"}
+{"id": "fin_326914", "reason": "reader B: no parseable output"}
+{"id": "fin_327555", "reason": "readers disagree"}
+{"id": "fin_327582", "reason": "reader A: unsupported - The clause is a post-closing covenant about delivering items and recording mortgages. It sets no numeric financial covenant that the Borrower must mai"}
+{"id": "fin_327924", "reason": "reader A: unsupported - The clause is a most-favored-nation provision that incorporates by reference financial covenants from other financings; it contains no numeric financi"}
+{"id": "fin_329082", "reason": "reader A: unsupported - The clause is a consolidation/merger/asset-sale covenant with conditions; it has no numeric financial covenant with its own threshold. The Fixed Charg"}
+{"id": "fin_329189", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_329529", "reason": "reader A: unsupported - The Minimum Tangible Net Worth covenant has a threshold that depends on another quantity ($217,514,250 plus 75% of net cash proceeds of equity issuanc"}
+{"id": "fin_330785", "reason": "readers disagree"}
+{"id": "fin_332180", "reason": "reader A: unsupported - The leverage covenants in 7.11(c)-(f) switch on the IPO Closing Date, on whether a Qualified Offering has been consummated, and on whether a Specified"}
+{"id": "fin_332749", "reason": "reader A: unsupported - Section 9.1(d) sets the Minimum Tangible Net Worth threshold as 85% of Tangible Net Worth on the Agreement Date plus 50% of Net Cash Proceeds of Equit"}
+{"id": "fin_332881", "reason": "reader A: unsupported - The clause is a general compliance-with-agreements covenant with no numeric financial covenant or threshold to test."}
+{"id": "fin_332887", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_333137", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_333834", "reason": "reader A: unsupported - The thresholds depend on event-defined periods (the Post Dropdown Period, which starts on an undated Dropdown Effective Date, and a Specified Acquisit"}
+{"id": "fin_334039", "reason": "reader A: unsupported - Several limits are not fixed numeric thresholds. The weighted average interest rate test in 6.18(d) must exceed the rate payable under Section 2.2(a) "}
+{"id": "fin_334058", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_334060", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_334558", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_334559", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_335854", "reason": "readers disagree"}
+{"id": "fin_336664", "reason": "reader A: unsupported - Section 5.13 governs designation of Restricted and Unrestricted Subsidiaries and contains no numeric financial covenant of its own. It only refers to "}
+{"id": "fin_336674", "reason": "reader A: unsupported - The clause is a negative covenant limiting optional payments and modifications of Junior Debt. The only numeric ratio (Total Leverage Ratio of 6.00:1."}
+{"id": "fin_336802", "reason": "reader B: unsupported - The threshold for the Current Ratio covenant is redacted (indicated by '* * *') in the provided text."}
+{"id": "fin_336813", "reason": "reader A: unsupported - This is a negative covenant restricting asset Dispositions, not a financial maintenance covenant. The numeric tests (Liquidity at least 10% of Commitm"}
+{"id": "fin_337670", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_338947", "reason": "reader A: unsupported - Section 9.16 restricts amendments to Senior Notes Documents (maturity, principal amount, covenants); it contains no numeric financial covenant limit s"}
+{"id": "fin_339479", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_340391", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_340652", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_36345", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_36451", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_37015", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_38262", "reason": "reader A: unsupported - The clause contains only affirmative covenants (reporting, maintenance, insurance, etc.) and no numeric financial covenant limit. The 2.50 to 1.00 Con"}
+{"id": "fin_38634", "reason": "reader A: unsupported - The debt service coverage threshold steps down to 1.00 to 1.0 for 'fiscal year 2002', but the clause does not state the Borrower's fiscal year-end. Th"}
+{"id": "fin_46853", "reason": "reader A: unsupported - The Minimum Consolidated Tangible Net Worth threshold in Section 5.07(d) is not a fixed number. It is $62,090,000 plus, cumulatively, 50% of Consolida"}
+{"id": "fin_49013", "reason": "reader A: unsupported - The minimum tangible net worth covenants (Sections 7A.01 and 7B.01) have thresholds that depend on another quantity: a fixed dollar floor plus 50% of "}
+{"id": "fin_49504", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_49505", "reason": "reader A: unsupported - The thresholds depend on the fiscal quarter (5.25 for Q1, 4.50 for Q2 and Q3, 3.50 for Q4, repeating every fiscal year). The clause does not state the"}
+{"id": "fin_49869", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_50607", "reason": "readers disagree"}
+{"id": "fin_51245", "reason": "reader A: unsupported - The schedule's test dates are fiscal quarters 'ended closest to' March 31, June 30 and September 30, 1996, so they cannot be pinned to exact calendar "}
+{"id": "fin_52788", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_52794", "reason": "reader A: unsupported - Section 5.11 is a debt-incurrence restriction made up of alternative permitted-debt baskets, not a single maintenance covenant. Clause (b) is a pro fo"}
+{"id": "fin_52802", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_52808", "reason": "reader A: unsupported - Section 5.11 is a debt-incurrence basket structure, not a single maintenance covenant. Debt is permitted under any one of several alternative baskets:"}
+{"id": "fin_63160", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_63162", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_66110", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_67513", "reason": "reader A: unsupported - The threshold schedule depends on dates that cannot be pinned to calendar dates from the clause. The start is the undefined 'Closing Date', and the st"}
+{"id": "fin_67514", "reason": "reader A: unsupported - The thresholds are scheduled by fiscal quarter (e.g. 'Second fiscal quarter 1999', 'Fourth fiscal quarter 2000'). The clause does not give the Borrowe"}
+{"id": "fin_68004", "reason": "reader A: unsupported - Section 6.12 limits outstanding commercial paper to the Aggregate Commitment minus the outstanding Advances. Its threshold therefore depends on other "}
+{"id": "fin_70510", "reason": "reader A: unsupported - The thresholds and test periods are not stated in the clause; they appear only in Schedule 7.1, which is not provided, so the thresholds and the calen"}
+{"id": "fin_76093", "reason": "reader A: unsupported - The clause is a reporting/information-delivery covenant (certificates, projections, reports); it contains no numeric financial covenant with a thresho"}
+{"id": "fin_82229", "reason": "reader A: unsupported - Section 7.03(b) sets the Minimum Consolidated Tangible Net Worth threshold as $115,000,000 plus 50% of cumulative consolidated net earnings after taxe"}
+{"id": "fin_82387", "reason": "reader A: unsupported - The minimum Consolidated Quick Ratio threshold is redacted ('[ ]' - confidential treatment requested), so no numeric threshold can be determined."}
+{"id": "fin_82388", "reason": "reader A: unsupported - The Leverage Ratio threshold is redacted (left blank as '[ ]'), so no numeric limit can be determined."}
+{"id": "fin_82389", "reason": "reader A: unsupported - Thresholds are redacted ('[ ]') throughout: the maximum net loss amounts, the number of Fiscal Quarters in each test period, the minimum fixed charge "}
+{"id": "fin_82834", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_82835", "reason": "readers disagree"}
+{"id": "fin_82836", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_83632", "reason": "reader A: unsupported - Section 6.4 is a permitted-acquisition condition, not a standalone financial maintenance covenant. Its Leverage Ratio threshold is defined relative to"}
+{"id": "fin_88114", "reason": "reader A: unsupported - The capital expenditures limit in (e) is set by the Borrower's fiscal year (2004 to 2009), and the clause does not give the fiscal year-end dates, so "}
+{"id": "fin_88389", "reason": "reader A: unsupported - The capital expenditures limit (d) is $400,000 per fiscal year, but it carries an additional $750,000 allowance until the first anniversary of the dat"}
+{"id": "fin_90046", "reason": "threshold 2.15 (ratio) not found in the text"}
+{"id": "fin_91164", "reason": "reader A: unsupported - The Tangible Net Worth covenant (7.20(d)) uses a schedule tied to the undefined 'Closing Date', Borrower's 'current fiscal year', and 'each subsequent"}
+{"id": "fin_91199", "reason": "reader A: unsupported - The Net Worth covenant in Section 8.21(b) has a threshold that depends on other quantities: $140,887,000 plus 50% of positive fiscal-year Net Income p"}
+{"id": "fin_91731", "reason": "reader A: unsupported - The Leverage Ratio and Debt Leverage Ratio thresholds step by the Borrower's 1999, 2000, 2001 and 2002 fiscal years. The clause does not say when thos"}
+{"id": "fin_91936", "reason": "reader B: no parseable output"}
+{"id": "fin_93808", "reason": "reader B: no parseable output"}
+{"id": "fin_93809", "reason": "readers disagree"}
+{"id": "fin_93812", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_95497", "reason": "readers disagree"}
+{"id": "fin_97029", "reason": "reader A: unsupported - Section 6.5.3 sets a minimum Consolidated Tangible Net Worth of $60,000,000 that increases each quarter by 50% of positive Consolidated Net Income plu"}
+{"id": "fin_98702", "reason": "no earnings or debt item (status-only clause)"}
+{"id": "fin_98704", "reason": "readers disagree"}
+{"id": "fin_99613", "reason": "reader B: no parseable output"}
+{"id": "fin_99853", "reason": "reader A: unsupported - The minimum Tangible Net Worth covenant (5.1.2) is not a fixed schedule. After March 31, 2000 the threshold rises by 50% of annual net income at each "}

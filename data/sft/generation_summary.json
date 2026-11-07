@@ -1,0 +1,20 @@
+{
+  "source": "experiments/larger_run/run_main/run_config.json record_ids (the GRPO training clauses)",
+  "clauses": 1000,
+  "attempted": 1000,
+  "accepted_and_fits_context": 789,
+  "rejections": {
+    "accepted": 799,
+    "z3_or_supported_fragment": 48,
+    "semantic_review": 123,
+    "missing_or_duplicate_parameter_comments": 12,
+    "ungrounded_symbol_table": 3,
+    "error": 8,
+    "teacher_needs_context": 7
+  },
+  "teacher": "claude-sonnet-5-5",
+  "judge": "claude-sonnet-5-5",
+  "transport": "claude_cli",
+  "reasoning_effort": "medium",
+  "max_sequence_tokens": 4096
+}

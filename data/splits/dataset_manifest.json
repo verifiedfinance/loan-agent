@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "source_file": "data/processed/financial_ratio_records.jsonl",
+  "source_sha256": "7d4e045b22b6cbf50665ab0c2b947c9e3a781ab4a4719c01946acac479cbbe8e",
+  "source_records": 12517,
+  "target_fractions": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "split_records": {
+    "train_unlabeled": 10016,
+    "validation": 1251,
+    "test": 1250
+  },
+  "split_contracts": {
+    "train_unlabeled": 6522,
+    "validation": 809,
+    "test": 835
+  },
+  "contract_duplicate_components": 7744,
+  "largest_component_records": 30,
+  "formalization_protocol": "pointwise_v2",
+  "instantiation_convention": "We adopt pointwise temporal semantics: each generated SMT formula specifies covenant applicability and compliance at an arbitrary observation time. Recurring obligations are interpreted through universal instantiation over all relevant observation points in a supplied finite financial history, preserving a quantifier-free SMT target language. The evaluator supplies every function parameter at each observation, including calendar applicability flags. It evaluates the function and conjoins all observed results. A finite history does not establish obligations between observations. At-all-times clauses are translated pointwise under this explicitly limited observation coverage; do not abstain solely because the source says at all times. Event-state values can be function inputs with precise source-grounded meanings; actual state values and calendar data are not needed to define the function. Extra state is required only when the source semantics cannot be specified by such inputs. Numeric division by zero is reported by the evaluator as unresolved, never silently compliant or noncompliant. This definedness policy does not assume a positive or nonzero denominator for all financial observations. No financial nonnegativity, denominator positivity, or other domain assumptions are implied.",
+  "split_policy": "Immutable; contracts and exact normalized duplicates stay together.",
+  "near_duplicates": "Reported separately; numeric variants are retained."
+}

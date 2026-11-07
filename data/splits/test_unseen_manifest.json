@@ -1,0 +1,21 @@
+{
+ "steps": {
+  "test + validation, minus validation_250": 2251,
+  "borrower never in train": 846,
+  "not a number-masked copy of a train clause": 845,
+  "no train clause with Jaccard >= 0.7": 533
+ },
+ "clauses": 533,
+ "borrowers": 361,
+ "contracts": 385,
+ "in_test_600": 128,
+ "years": {
+  "1990": 14,
+  "1995": 229,
+  "2000": 109,
+  "2005": 85,
+  "2010": 73,
+  "2015": 23
+ },
+ "sha256": "a4552dbd805327392ef79e4d324209baa7557a8695bfa97746fd8f45c770fa91"
+}
