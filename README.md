@@ -5,6 +5,8 @@ compliance, how far can its earnings fall, and how much more debt can it take?* 
 (Qwen2.5-Coder-7B + LoRA) to translate each covenant once into an SMT formula over the compliance certificate's line
 items; the Z3 solver then answers all three questions exactly, for any certificate, in-house.
 
+![Overview: the quarterly covenant check done by hand, by a model reading the clause directly, and by formalizing once and solving with Z3](docs/fig_overview.png)
+
 ![Method: distill, then GRPO with a solver-checked reward, then verify and run in-house](docs/fig_method.png)
 
 ## Results
