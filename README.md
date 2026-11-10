@@ -99,3 +99,8 @@ versions in `requirements.lock.txt`); one 96 GB GPU (each GRPO run takes about 1
 reader are called through the `claude` command-line tool. The TikZ figures are compiled when `pdflatex` is installed
 (TeX Live `latex-extra`, `pictures`, `fonts-recommended`; the method figure also needs `fontawesome5`); otherwise
 stage 06 writes only the `.tex` sources.
+
+## Data
+
+The covenant clauses come from the loan-agreement text data of Ganglmair and Wardlaw, "Complexity, Standardization,
+and the Design of Loan Agreements" (SSRN 2952567), available on Zenodo (record 20014336) under CC BY 4.0.
