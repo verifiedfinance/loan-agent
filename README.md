@@ -60,7 +60,7 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
 │   ├── sft/               # the 789 SFT pairs and their generation audit
 │   ├── rl/                # unlabeled RL clause pools (rl_v3: the final reward's pool)
 │   ├── headroom/          # reference readings, specs, cases, reference validation
-│   ├── raw/               # source agreements (not included, see "Data")
+│   ├── raw/               # source agreements (not included)
 │   └── processed/         # extracted clause records (not included, rebuilt by stage 01)
 ├── models/                # LoRA adapters (not included, see MODELS.md)
 ├── notebooks/             # every table and figure
@@ -99,9 +99,3 @@ versions in `requirements.lock.txt`); one 96 GB GPU (each GRPO run takes about 1
 reader are called through the `claude` command-line tool. The TikZ figures are compiled when `pdflatex` is installed
 (TeX Live `latex-extra`, `pictures`, `fonts-recommended`; the method figure also needs `fontawesome5`); otherwise
 stage 06 writes only the `.tex` sources.
-
-## Data
-
-The clauses come from the loan-agreement text data of Ganglmair and Wardlaw (Zenodo record 20014336, CC BY 4.0;
-"Complexity, Standardization, and the Design of Loan Agreements", SSRN 2952567). Place the archive in `data/raw/loan_data/`
-before running stage 01. How the data was obtained and the benchmark built: [`docs/data_and_benchmark.md`](docs/data_and_benchmark.md).
