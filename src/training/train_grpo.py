@@ -193,7 +193,8 @@ def main():
     from rl_rewards import make_grpo_reward
     if not torch.cuda.is_available():
         raise RuntimeError('A working CUDA GPU is required')
-    tokenizer = AutoTokenizer.from_pretrained(str(args.model), padding_side='left')
+    from lora_utils import load_tokenizer
+    tokenizer = load_tokenizer(str(args.model), padding_side='left')
     data = data.filter(lambda row: len(tokenizer.apply_chat_template(
         row['prompt'], tokenize=True, return_dict=False, add_generation_prompt=True)) <= 3072)
     if not len(data):
