@@ -43,17 +43,34 @@ PALETTE = {'blue_main': '#0F4D92', 'blue_secondary': '#3775BA', 'green_1': '#DDF
            'green_3': '#8BCF8B', 'red_1': '#F6CFCB', 'red_2': '#E9A6A1', 'red_strong': '#B64342', 'neutral': '#CFCECE',
            'gray_mid': '#767676', 'gray_dark': '#4D4D4D', 'ink': '#272727', 'highlight': '#FFD700', 'teal': '#42949E',
            'violet': '#9A4D8E'}
+# Figures are drawn at their printed size: TW is the LNCS text width (12.2 cm), and the paper includes every figure at
+# width=\textwidth, so font sizes below are the sizes in print (body text 10 pt, captions 9 pt; nothing below 6 pt).
+TW = 4.8
+FS_VAL = 6       # values written on bars
 plt.rcParams.update({
     'font.family': 'sans-serif', 'font.sans-serif': ['Arial', 'Helvetica', 'Liberation Sans', 'Nimbus Sans', 'DejaVu Sans'],
-    'font.size': 16, 'axes.linewidth': 2, 'axes.spines.right': False, 'axes.spines.top': False,
+    'font.size': 7.5, 'axes.titlesize': 7.5, 'axes.labelsize': 7.5, 'xtick.labelsize': 7, 'ytick.labelsize': 7,
+    'legend.fontsize': 7, 'axes.linewidth': 0.6, 'axes.spines.right': False, 'axes.spines.top': False,
     'legend.frameon': False, 'svg.fonttype': 'none', 'pdf.fonttype': 42, 'ps.fonttype': 42,
-    'xtick.major.width': 2, 'ytick.major.width': 2, 'xtick.major.size': 5, 'ytick.major.size': 5,
+    'xtick.major.width': 0.6, 'ytick.major.width': 0.6, 'xtick.major.size': 2.5, 'ytick.major.size': 2.5,
+    'xtick.major.pad': 2, 'ytick.major.pad': 2, 'axes.labelpad': 2, 'axes.titlepad': 4, 'lines.linewidth': 1.2,
+    'hatch.linewidth': 0.5, 'legend.handlelength': 1.5, 'legend.handleheight': 0.8, 'legend.handletextpad': 0.5,
+    'legend.columnspacing': 1.2, 'legend.labelspacing': 0.35, 'legend.borderaxespad': 0.2,
     'axes.labelcolor': PALETTE['ink'], 'xtick.color': PALETTE['ink'], 'ytick.color': PALETTE['ink'], 'text.color': PALETTE['ink'],
 })
+BAR = dict(edgecolor='black', linewidth=0.4)          # bar outline
+ERR = dict(fmt='none', ecolor='black', capsize=1.2, capthick=0.5, linewidth=0.5)
 
 
-def finalize(fig, name, pad=2):
-    fig.tight_layout(pad=pad)
+def top_legend(fig, handles, labels, ncol, **kw):
+    """Legend centred above all panels; returns the figure fraction left for the axes (pass to finalize as top)."""
+    rows = math.ceil(len(labels) / ncol)
+    fig.legend(handles, labels, loc='upper center', ncol=ncol, bbox_to_anchor=(0.5, 1.0), **kw)
+    return 1 - (rows * 0.135 + 0.06) / fig.get_figheight()
+
+
+def finalize(fig, name, pad=0.3, top=1.0):
+    fig.tight_layout(pad=pad, rect=(0, 0, 1, top))
     for ext in ('png', 'pdf'):
         fig.savefig(FIG / f'{name}.{ext}', dpi=300, facecolor='white')
     plt.close(fig)
@@ -122,8 +139,13 @@ def per_clause(m, keep=None):
 
 
 def q_acc(m, q, keep=None):
-    v = [mk[q] for k, mk in m.items() if q in mk and (keep is None or keep(cases()[k]))]
-    return sum(v) / len(v)
+    """Accuracy on one question, averaged like the overall score: first over the cases of each clause that ask it, then
+    over those clauses (143 for the status, 94 for the cushion, 97 for the capacity)."""
+    by = defaultdict(list)
+    for k, mk in m.items():
+        if q in mk and (keep is None or keep(cases()[k])):
+            by[cases()[k]['clause_id']].append(mk[q])
+    return sum(sum(v) / len(v) for v in by.values()) / len(by)
 
 
 def mean(d):
@@ -240,7 +262,9 @@ def cross_check(a_name, b_name, a_rel, cache_name):
     pc = per_clause(m)
     agreed = [k for k, r in res.items() if r == 'agree']
     other = [k for k, r in res.items() if r != 'agree']
-    return dict(n=len(res), agreed=len(agreed), coverage=len(agreed) / len(res),
+    ver = {json.loads(l)['clause_id']: json.loads(l)['result'] for l in open(RES / f'verification/{a_name}.jsonl')}
+    proven = sum(ver.get(k) == 'equivalent' for k in agreed)
+    return dict(n=len(res), agreed=len(agreed), coverage=len(agreed) / len(res), proven_agreed=proven,
                 acc_agreed=sum(pc[k] for k in agreed) / len(agreed) if agreed else float('nan'),
                 acc_other=sum(pc[k] for k in other) / len(other) if other else float('nan'))
 
@@ -353,10 +377,11 @@ def table_main():
     best['proven'] = max(proven, key=proven.get)
     bold = lambda txt, b: r'\textbf{' + txt + '}' if b else txt
     lat = [r'\begin{table*}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{5pt}',
-           r'\caption{Results on \bench{}. Score is the share of questions answered correctly, averaged over covenants '
-           r'(95\% intervals in \cref{fig:main}). For FormaFin (shaded), $\pm$ is the standard deviation over three '
+           r'\caption{Results on \bench{}. Score is the share of questions answered correctly, averaged first over the cases '
+           r'of each covenant and then over covenants (95\% intervals in \cref{fig:main}). Status, Cushion and Capacity '
+           r'are averaged the same way, over the 143, 94 and 97 covenants that ask each question. For FormaFin (shaded), $\pm$ is the standard deviation over three '
            r'training runs. Proven: share of formulas verified correct for every possible input (readers write no '
-           r'formulas). Gain: score minus that of the best reader, ' + S[best_reader]['label'] + r'. Best results in bold.}',
+           r'formulas). Gain: score minus that of the best reader, ' + S[best_reader]['label'] + r', computed before rounding. Best results in bold.}',
            r'\label{tab:main}', r'\begin{adjustbox}{max width=\linewidth}',
            r'\begin{tabular}{lcrccccc}', r'\toprule',
            r' & & & \multicolumn{3}{c}{By question} & & \\',
@@ -447,7 +472,9 @@ def table_verification():
 
 CROSS = [('rl789_sched_s42', 'rl789_sched_s43', 'answers/formula_rl789_sched_s42.jsonl', 'sched42_sched43', 'FormaFin seed 42 $\\times$ seed 43', 'FormaFin seed 42 × seed 43'),
          ('rl789_sched_s42', 'sft789', 'answers/formula_rl789_sched_s42.jsonl', 'sched42_sft', 'FormaFin seed 42 $\\times$ SFT', 'FormaFin seed 42 × SFT'),
-         ('sft789', 'qwen7b_prompted', 'answers/formula_sft789.jsonl', 'sft_prompted', 'SFT $\\times$ prompted 7B', 'SFT × prompted 7B')]
+         ('sft789', 'qwen7b_prompted', 'answers/formula_sft789.jsonl', 'sft_prompted', 'SFT $\\times$ prompted 7B', 'SFT × prompted 7B'),
+         ('rl789_sched_s42', 'llama_rl_sched_s42', 'answers/formula_rl789_sched_s42.jsonl', 'sched42_llama42', 'FormaFin Qwen $\\times$ Llama', 'FormaFin Qwen × Llama'),
+         ('rl789_sched_s42', 'mistral_rl_v2_s42', 'answers/formula_rl789_sched_s42.jsonl', 'sched42_mistral42', 'FormaFin Qwen $\\times$ Mistral', 'FormaFin Qwen × Mistral')]
 
 
 def table_selfcheck():
@@ -455,16 +482,18 @@ def table_selfcheck():
            r'\caption{Label-free self-check. Two formalizers write a formula for the same clause and Z3 checks whether '
            r'the two are equivalent for all inputs; no reference reading is used. Agreed clauses could be checked '
            r"automatically every quarter; the rest go to an analyst. Score: the first formalizer's "
-           r'case-level score on each group.}',
-           r'\label{tab:selfcheck}', r'\begin{tabular}{@{}lccc@{}}', r'\toprule',
-           r'\textbf{Pair of formalizers} & \textbf{Agree (coverage)} & \textbf{Score, agreed} & \textbf{Score, to analyst} \\', r'\midrule']
-    md = ['| Pair | Agree (coverage) | Score, agreed | Score, to analyst |', '|---|---|---|---|']
+           r'case-level score on each group. Proven: agreed clauses on which Z3 also proves the first formalizer equivalent '
+           r'to the reference reading. The three FormaFin seeds share one Stage I adapter; the cross-family pairs (seed 42 '
+           r'of each family) share only the teacher data.}',
+           r'\label{tab:selfcheck}', r'\begin{tabular}{@{}lcccc@{}}', r'\toprule',
+           r'\textbf{Pair of formalizers} & \textbf{Agree (coverage)} & \textbf{Proven} & \textbf{Score, agreed} & \textbf{Score, to analyst} \\', r'\midrule']
+    md = ['| Pair | Agree (coverage) | Proven among agreed | Score, agreed | Score, to analyst |', '|---|---|---|---|---|']
     out = []
     for a, b, rel, cache, lab_t, lab_m in CROSS:
         r = cross_check(a, b, rel, cache)
         out.append((lab_m, r))
-        lat.append(f"{lab_t} & {r['agreed']} / {r['n']} ({pct(r['coverage'], 0)}\\%) & {pct(r['acc_agreed'])} & {pct(r['acc_other'])} \\\\")
-        md.append(f"| {lab_m} | {r['agreed']} / {r['n']} ({pct(r['coverage'], 0)}%) | {pct(r['acc_agreed'])} | {pct(r['acc_other'])} |")
+        lat.append(f"{lab_t} & {r['agreed']} / {r['n']} ({pct(r['coverage'], 0)}\\%) & {r['proven_agreed']} / {r['agreed']} & {pct(r['acc_agreed'])} & {pct(r['acc_other'])} \\\\")
+        md.append(f"| {lab_m} | {r['agreed']} / {r['n']} ({pct(r['coverage'], 0)}%) | {r['proven_agreed']} / {r['agreed']} | {pct(r['acc_agreed'])} | {pct(r['acc_other'])} |")
     lat += [r'\bottomrule', r'\end{tabular}', r'\end{table}']
     write('tab5_selfcheck', '\n'.join(lat), '\n'.join(md))
     return '\n'.join(lat), '\n'.join(md), out
@@ -536,12 +565,12 @@ def fig_main():
               'qwen27b': 'Qwen3.8-27B, reads directly', 'llama70b': 'Llama-3.3-70B (4-bit), reads directly',
               'sft': 'Ours: SFT, Qwen2.5-Coder-7B', 'rl_v2': 'Ours: FormaFin, Qwen2.5-Coder-7B',
               'ff_llama': 'Ours: FormaFin, Llama-3.1-8B', 'ff_mistral': 'Ours: FormaFin, Mistral-7B'}
-    metrics = [('score', 'Overall\n(per clause)'), ('status', 'Status'), ('cushion', 'Earnings\ncushion'), ('capacity', 'Debt\ncapacity')]
-    fig, (ax, lg) = plt.subplots(1, 2, figsize=(22, 6.6), gridspec_kw=dict(width_ratios=[1, 0.33]))
+    metrics = [('score', 'Overall (per clause)'), ('status', 'Status'), ('cushion', 'Earnings cushion'), ('capacity', 'Debt capacity')]
+    fig, ax = plt.subplots(figsize=(TW, 2.75))
     n = len(keys)
     w = 0.86 / n
     gx = np.arange(len(metrics))
-    def counts(rel, q):  # per clause: (score sum, n) -- per-clause mean for 'score', pooled cases for a question
+    def counts(rel, q):  # per clause: (score sum, n) -- per-clause mean for 'score' and for each question
         by = defaultdict(lambda: [0.0, 0])
         for cid, mk in marks(rel).items():
             c = cases()[cid]['clause_id']
@@ -563,63 +592,63 @@ def fig_main():
                 per = np.array([np.mean([r[c][0] / r[c][1] for r in runs]) for c in cl])
                 est = per.mean()
                 boot = per[rng.integers(0, len(cl), (10_000, len(cl)))].mean(1)
-            else:              # Table 1 columns: share of all cases answering this question (mean over seeds)
-                num = np.array([sum(r[c][0] for r in runs) for c in cl]); den = np.array([sum(r[c][1] for r in runs) for c in cl])
-                est = num.sum() / den.sum()
-                idx = rng.integers(0, len(cl), (10_000, len(cl)))
-                boot = num[idx].sum(1) / den[idx].sum(1)
+            else:              # Table 1 columns: per-clause accuracy on this question, averaged over clauses (seed-mean)
+                per = np.array([np.mean([r[c][0] / r[c][1] for r in runs]) for c in cl])
+                est = per.mean()
+                boot = per[rng.integers(0, len(cl), (10_000, len(cl)))].mean(1)
             v = 100 * est
             vals.append(v); lo.append(v - 100 * np.percentile(boot, 2.5)); hi.append(100 * np.percentile(boot, 97.5) - v)
-        ax.bar(xs, vals, width=w, color=COLORS[k], edgecolor='black', linewidth=1.4, hatch=HATCH.get(k), label=labels[k], zorder=2)
-        ax.errorbar(xs, vals, yerr=[lo, hi], fmt='none', ecolor='black', capsize=2.5, capthick=1.1, linewidth=1.1, zorder=3)
+        ax.bar(xs, vals, width=w, color=COLORS[k], hatch=HATCH.get(k), label=labels[k], zorder=2, **BAR)
+        ax.errorbar(xs, vals, yerr=[lo, hi], zorder=3, **ERR)
         for xi, v, h in zip(xs, vals, hi):
-            ax.text(xi, v + h + 1.2, f'{v:.1f}', ha='center', va='bottom', fontsize=11, rotation=90,
+            ax.text(xi, v + h + 1.0, f'{v:.1f}', ha='center', va='bottom', fontsize=FS_VAL, rotation=90,
                     fontweight='bold' if k in OURS_SD else 'normal')
     for g in gx[:-1]:
-        ax.axvline(g + 0.5, color=PALETTE['neutral'], linewidth=1.2, zorder=1)
+        ax.axvline(g + 0.5, color=PALETTE['neutral'], linewidth=0.6, zorder=1)
     ax.set_xticks(gx)
-    ax.set_xticklabels([t for _, t in metrics], fontsize=16)
+    ax.set_xticklabels([t for _, t in metrics])
+    ax.tick_params(axis='x', length=0)
     ax.set_xlim(-0.5, len(metrics) - 0.5)
-    ax.set_ylim(0, 118)
+    ax.set_ylim(0, 117)
     ax.set_yticks([0, 20, 40, 60, 80, 100])
     ax.set_ylabel('Correct (%)')
-    lg.set_axis_off()
-    h, l = ax.get_legend_handles_labels()
-    lg.legend(h, l, loc='center left', fontsize=14, labelspacing=0.9, handleheight=1.3)
-    return finalize(fig, 'fig1_main')
+    h, l = ax.get_legend_handles_labels()       # 2 columns: readers left, ours right
+    top = top_legend(fig, h, l, ncol=2)
+    return finalize(fig, 'fig1_main', top=top)
 
 
 def fig_size():
     """Fig. 2: accuracy against model size; direct readers (line) vs our 7-8B formalizers."""
     S = system_stats()
-    fig, ax = plt.subplots(figsize=(10.5, 6.6))
+    fig, ax = plt.subplots(figsize=(0.6 * TW, 2.35))   # included at 0.6\textwidth (main_long)
     xs = {'qwen7b': 7, 'qwen27b': 27, 'qwen32b': 32, 'llama70b': 70}
     pts = sorted(xs, key=lambda k: xs[k])
-    ax.plot([xs[k] for k in pts], [100 * S[k]['score'] for k in pts], color=PALETTE['gray_mid'], linewidth=1.8,
-            linestyle=(0, (4, 3)), marker='o', markersize=11, markerfacecolor=PALETTE['neutral'], markeredgecolor='black', markeredgewidth=1.5,
-            label='Open models reading the clause directly', zorder=3)
-    offs = {'qwen7b': (10, -22), 'qwen27b': (-50, 14), 'qwen32b': (8, 10), 'llama70b': (-150, -26)}
+    ax.plot([xs[k] for k in pts], [100 * S[k]['score'] for k in pts], color=PALETTE['gray_mid'], linewidth=0.9,
+            linestyle=(0, (4, 3)), marker='o', markersize=4.5, markerfacecolor=PALETTE['neutral'], markeredgecolor='black', markeredgewidth=0.6,
+            label='Open models reading directly', zorder=3)
+    offs = {'qwen7b': (5, -9), 'qwen27b': (-24, 6), 'qwen32b': (4, 4), 'llama70b': (-62, -10)}
+    names = {'qwen7b': 'Qwen-Coder-7B', 'qwen27b': 'Qwen3.8-27B', 'qwen32b': 'Qwen-Coder-32B', 'llama70b': 'Llama-3.3-70B'}
     for k in pts:
         lo, hi = S[k]['ci']
-        ax.vlines(xs[k], 100 * lo, 100 * hi, color=PALETTE['gray_mid'], linewidth=2, alpha=0.7, zorder=2)
-        ax.annotate(S[k]['label'], (xs[k], 100 * S[k]['score']), xytext=offs[k], textcoords='offset points', fontsize=13)
-    ours = (('sft', 's', 6.2, 'SFT, Qwen-Coder-7B', (-12, -6), 'right'), ('ff_mistral', 'D', 7.0, 'FormaFin, Mistral-7B', (14, -6), 'left'),
-            ('rl_v2', '*', 7.8, 'FormaFin, Qwen-Coder-7B', (14, -6), 'left'), ('ff_llama', '^', 8.8, 'FormaFin, Llama-8B', (14, -6), 'left'))
-    for k, mk, xo, lab, off, ha in ours:
+        ax.vlines(xs[k], 100 * lo, 100 * hi, color=PALETTE['gray_mid'], linewidth=0.8, alpha=0.7, zorder=2)
+        ax.annotate(names[k], (xs[k], 100 * S[k]['score']), xytext=offs[k], textcoords='offset points', fontsize=6.5)
+    ours = (('sft', 's', 6.2, 'SFT, Qwen-7B'), ('ff_mistral', 'D', 7.0, 'FormaFin, Mistral-7B'),
+            ('rl_v2', '*', 7.8, 'FormaFin, Qwen-7B'), ('ff_llama', '^', 8.8, 'FormaFin, Llama-8B'))
+    for k, mk, xo, lab in ours:
         lo, hi = S[k]['ci']
-        ax.vlines(xo, 100 * lo, 100 * hi, color=COLORS[k], linewidth=2.5, alpha=0.8, zorder=4)
-        ax.plot(xo, 100 * S[k]['score'], marker=mk, markersize=20 if mk == '*' else 12, color=COLORS[k],
-                markeredgecolor='black', markeredgewidth=1.5, linestyle='', zorder=5)
-        ax.plot([], [], marker=mk, markersize=15 if mk == '*' else 11, color=COLORS[k], markeredgecolor='black',
-                markeredgewidth=1.3, linestyle='', label=f"Ours: {lab}  ({100 * S[k]['score']:.1f})")
-    ax.set_xlabel('Parameters of the model answering (billions)')
+        ax.vlines(xo, 100 * lo, 100 * hi, color=COLORS[k], linewidth=1.0, alpha=0.8, zorder=4)
+        ax.plot(xo, 100 * S[k]['score'], marker=mk, markersize=7 if mk == '*' else 4.5, color=COLORS[k],
+                markeredgecolor='black', markeredgewidth=0.6, linestyle='', zorder=5)
+        ax.plot([], [], marker=mk, markersize=6 if mk == '*' else 4, color=COLORS[k], markeredgecolor='black',
+                markeredgewidth=0.5, linestyle='', label=f"Ours: {lab} ({100 * S[k]['score']:.1f})")
+    ax.set_xlabel('Parameters of the answering model (B)')
     ax.set_ylabel('Correct per clause (%)')
     ax.set_xlim(0, 76)
     ax.set_xticks([7, 27, 32, 70])
     ax.set_ylim(55, 102)
     h, l = ax.get_legend_handles_labels()
     order = [l.index(x) for x in sorted(l, key=lambda t: (not t.startswith('Open'), t))]
-    ax.legend([h[i] for i in order], [l[i] for i in order], loc='lower right', fontsize=12.5, labelspacing=0.7)
+    ax.legend([h[i] for i in order], [l[i] for i in order], loc='lower right', fontsize=6.5, handlelength=1.2)
     return finalize(fig, 'fig2_size')
 
 
@@ -638,15 +667,15 @@ def fig_training():
     """Fig. 3: learning curves for all three model families (adopted reward). (a) SFT loss; GRPO, three seeds each:
     (b) reward of the sampled formulas, (c) share of steps whose four samples differ in reward (the only steps with a
     gradient), (d) share of samples keeping the interface. Lines: mean over seeds; bands: range over seeds."""
-    fig, axes = plt.subplots(1, 3, figsize=(19, 5.6))
-    panels = [('signal', '(b) GRPO: steps with a learning signal', 'Steps whose samples differ (%)'),
-              ('sig', '(c) GRPO: interface kept', 'Samples with exact parameters (%)')]   # the reward is in Fig. 5b
+    fig, axes = plt.subplots(1, 3, figsize=(TW, 1.95))
+    panels = [('signal', '(b) GRPO: learning signal', 'Steps whose samples differ (%)'),
+              ('sig', '(c) GRPO: interface kept', 'Samples, exact parameters (%)')]   # the reward is in Fig. 5b
     for fam, sft_dir, rl_dir, col, ls in TRAIN_FAMILIES:
         sft = [h for h in json.loads((P.MODELS / sft_dir / 'trainer_state.json').read_text())['log_history'] if 'loss' in h]
         st = [h['step'] for h in sft]
         loss = [h['loss'] for h in sft]
-        axes[0].plot(st, loss, color=col, linewidth=1, alpha=0.3)
-        axes[0].plot(st[len(st) - len(_rolling(loss, 10)):], _rolling(loss, 10), color=col, linewidth=3, linestyle=ls, label=fam)
+        axes[0].plot(st, loss, color=col, linewidth=0.4, alpha=0.3)
+        axes[0].plot(st[len(st) - len(_rolling(loss, 10)):], _rolling(loss, 10), color=col, linewidth=1.2, linestyle=ls, label=fam)
         curves = defaultdict(list)
         for sd in (42, 43, 44):
             rows = [json.loads(l) for l in open(P.MODELS / rl_dir.format(sd) / 'exec_rewards.jsonl')]
@@ -659,27 +688,21 @@ def fig_training():
             arr = np.array([c[:n] for c in curves[key]])
             steps = np.arange(n) + 50
             ax.fill_between(steps, arr.min(0), arr.max(0), color=col, alpha=0.18, linewidth=0)
-            ax.plot(steps, arr.mean(0), color=col, linewidth=2.6, linestyle=ls, label=fam)
+            ax.plot(steps, arr.mean(0), color=col, linewidth=1.2, linestyle=ls, label=fam)
     ax = axes[0]
-    ax.set_title('(a) SFT: training loss', loc='left', fontsize=19)
-    ax.set_xlabel('SFT step (1 epoch, 789 pairs)')
-    ax.set_ylabel('Cross-entropy loss (10-step mean)')
+    ax.set_title('(a) SFT: training loss', loc='left')
+    ax.set_xlabel('SFT step (1 epoch)')
+    ax.set_ylabel('Loss (10-step mean)')
     ax.set_ylim(0, None)
-    ax.legend(loc='upper right', fontsize=14)
     for ax, (key, title, ylab) in zip(axes[1:], panels):
-        ax.set_title(title, loc='left', fontsize=19)
+        ax.set_title(title, loc='left')
         ax.set_xlabel('GRPO step (50-step mean)')
         ax.set_ylabel(ylab)
         ax.set_xlim(0, 1000)
-    axes[2].plot([], [], color='gray', linewidth=2.6, label='mean over 3 seeds')
-    axes[2].fill_between([], [], [], color='gray', alpha=0.25, label='range over 3 seeds')
-    h2, l2 = axes[2].get_legend_handles_labels()
-    axes[2].legend(h2[-2:], l2[-2:], loc='lower right', fontsize=13, frameon=False)   # families are named in panel (a)
-    for ax in axes:
-        ax.tick_params(labelsize=15)
-        ax.xaxis.label.set_size(16)
-        ax.yaxis.label.set_size(16)
-    return finalize(fig, 'fig3_training')
+        ax.set_xticks([0, 500, 1000])
+    h, l = axes[0].get_legend_handles_labels()   # mean and range over seeds are explained in the caption
+    top = top_legend(fig, h, l, ncol=3, handlelength=2.6)
+    return finalize(fig, 'fig3_training', top=top)
 
 
 def fig_verification():
@@ -687,49 +710,54 @@ def fig_verification():
     ver = verification()
     S = system_stats()
     rows = [('prompted', 'Prompted 7B'), ('sft', 'SFT'), ('rl_v1', 'RL, no gate')] + [(f'rl_v2_s{s}', f'FormaFin ({s})') for s in RL_V2]
-    fig, axes = plt.subplots(1, 3, figsize=(24, 6.4), gridspec_kw=dict(width_ratios=[1.35, 1, 0.55]))
+    fig, axes = plt.subplots(1, 2, figsize=(TW, 2.3), gridspec_kw=dict(width_ratios=[1.1, 1.2]))
     ax = axes[0]
     y = np.arange(len(rows))[::-1]
-    segs = [('equivalent', 'Proven equivalent', PALETTE['blue_main'], None), ('different', 'Counterexample found', PALETTE['red_2'], None),
-            ('invalid', 'Unusable (invalid / wrong interface)', PALETTE['neutral'], None)]
+    segs = [('equivalent', 'Proven equivalent', PALETTE['blue_main'], None), ('different', 'Counterexample', PALETTE['red_2'], None),
+            ('invalid', 'Unusable', PALETTE['neutral'], None)]
     left = np.zeros(len(rows))
     for key, lab, col, h in segs:
         vals = np.array([ver[k][key] for k, _ in rows])
-        ax.barh(y, vals, left=left, color=col, edgecolor='black', linewidth=1.5, hatch=h, height=0.7, label=lab)
+        ax.barh(y, vals, left=left, color=col, hatch=h, height=0.7, label=lab, **BAR)
         for yi, l, v in zip(y, left, vals):
-            if v >= 8:
-                ax.text(l + v / 2, yi, str(int(v)), ha='center', va='center', fontsize=13,
+            if v >= 10:
+                ax.text(l + v / 2, yi, str(int(v)), ha='center', va='center', fontsize=FS_VAL + 0.5,
                         color='white' if key == 'equivalent' else PALETTE['ink'])
         left += vals
     ax.set_yticks(y)
     ax.set_yticklabels([l for _, l in rows])
+    ax.tick_params(axis='y', length=0)
     ax.set_xlabel('Clauses (of 143)')
     ax.set_xlim(0, 143)
-    ax.set_title('(a) Formal verification against the reference', loc='left', fontsize=17)
+    ax.set_xticks([0, 25, 50, 75, 100, 125])
+    ax.set_title('(a) Formal verification vs. reference', loc='left')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.45, -0.2), ncol=3, columnspacing=0.9)
     ax2 = axes[1]
     cross = [(lab, cross_check(a, b, rel, cache)) for a, b, rel, cache, _, lab in CROSS]
+    short = {'FormaFin seed 42 × seed 43': 'seeds\n42×43', 'FormaFin seed 42 × SFT': 'seed 42\n×SFT',
+             'SFT × prompted 7B': 'SFT×\nprompt', 'FormaFin Qwen × Llama': 'Qwen×\nLlama',
+             'FormaFin Qwen × Mistral': 'Qwen×\nMistral'}
     x = np.arange(len(cross))
-    w = 0.36
-    b1 = ax2.bar(x - w / 2, [100 * r['acc_agreed'] for _, r in cross], width=w, color=PALETTE['blue_main'], edgecolor='black',
-                 linewidth=1.5, label='Formulas agree: automatic')
-    b2 = ax2.bar(x + w / 2, [100 * r['acc_other'] for _, r in cross], width=w, color=PALETTE['red_2'], edgecolor='black',
-                 linewidth=1.5, label='Do not agree: to an analyst')
+    w = 0.38
+    b1 = ax2.bar(x - w / 2, [100 * r['acc_agreed'] for _, r in cross], width=w, color=PALETTE['blue_main'],
+                 label='Agree: automatic', **BAR)
+    b2 = ax2.bar(x + w / 2, [100 * r['acc_other'] for _, r in cross], width=w, color=PALETTE['red_2'],
+                 label='Disagree: to an analyst', **BAR)
     for bars in (b1, b2):
         for b in bars:
-            ax2.text(b.get_x() + b.get_width() / 2, b.get_height() + 1.2, f'{b.get_height():.1f}', ha='center', va='bottom', fontsize=13)
+            ax2.text(b.get_x() + b.get_width() / 2, b.get_height() + 1.5, f'{b.get_height():.1f}', ha='center', va='bottom',
+                     fontsize=FS_VAL, rotation=90)
     for xi, (_, r) in zip(x, cross):
-        ax2.text(xi - w / 2, 50, f"{100 * r['coverage']:.0f}%\nof\nclauses", ha='center', va='center', fontsize=12,
-                 color='white', fontweight='bold', linespacing=1.1)
+        ax2.text(xi - w / 2, 4, f"{100 * r['coverage']:.0f}%", ha='center', va='bottom', fontsize=FS_VAL,
+                 color='white', fontweight='bold', rotation=90)
     ax2.set_xticks(x)
-    ax2.set_xticklabels([l.replace(' × ', '\n× ') for l, _ in cross], fontsize=13)
+    ax2.set_xticklabels([short.get(l, l) for l, _ in cross])
+    ax2.tick_params(axis='x', length=0, labelsize=FS_VAL + 0.5)
     ax2.set_ylabel('Correct per clause (%)')
-    ax2.set_ylim(0, 128)
+    ax2.set_ylim(0, 118)
     ax2.set_yticks([0, 20, 40, 60, 80, 100])
-    ax2.legend(loc='upper center', ncol=2, fontsize=12, columnspacing=1.2, handleheight=1.2, bbox_to_anchor=(0.5, 1.02))
-    ax2.set_title('(b) Label-free self-check: two formalizers agree?', loc='left', fontsize=17)
-    axes[2].set_axis_off()
-    h1, l1 = ax.get_legend_handles_labels()
-    axes[2].legend(h1, l1, loc='center left', fontsize=13, labelspacing=1.0, handleheight=1.3, title='Panel (a)', title_fontsize=14)
+    ax2.legend(loc='upper center', ncol=1, bbox_to_anchor=(0.5, -0.24))
+    ax2.set_title('(b) Two formalizers agree?', loc='left')
     return finalize(fig, 'fig4_verification')
 
 
@@ -746,34 +774,36 @@ def fig_cases():
     keys = [('qwen7b', 'answers_long/direct_qwen7b.jsonl'), ('qwen27b', 'answers_long/direct_qwen27b.jsonl'),
             ('qwen32b', 'answers_long/direct_qwen32b.jsonl'), ('llama70b', 'answers_long/direct_llama70b.jsonl'),
             ('sft', 'answers/formula_sft789.jsonl'), ('rl_v2', None)]
-    labels = {'qwen7b': 'Qwen2.5-Coder-7B, reads directly', 'qwen32b': 'Qwen2.5-Coder-32B, reads directly',
-              'qwen27b': 'Qwen3.8-27B, reads directly', 'llama70b': 'Llama-3.3-70B (4-bit), reads directly',
-              'sft': 'Ours: SFT (Qwen2.5-Coder-7B)', 'rl_v2': 'Ours: FormaFin (Qwen2.5-Coder-7B, 3 seeds)'}
+    labels = {'qwen7b': 'Reads: Qwen2.5-Coder-7B', 'qwen32b': 'Reads: Qwen2.5-Coder-32B',
+              'qwen27b': 'Reads: Qwen3.8-27B', 'llama70b': 'Reads: Llama-3.3-70B (4-bit)',
+              'sft': 'Ours: SFT (Qwen-Coder-7B)', 'rl_v2': 'Ours: FormaFin (Qwen-Coder-7B)'}
 
     def acc(rel, keep):
         if rel is None:
             return float(np.mean([mean(per_clause(marks(r), keep)) for r in RL_V2.values()]))
         return mean(per_clause(marks(rel), keep))
-    fig, axes = plt.subplots(1, 2, figsize=(22, 6.2), gridspec_kw=dict(width_ratios=[1, 0.32]))
-    ax = axes[0]
+    fig, ax = plt.subplots(figsize=(TW, 2.55))
     x = np.arange(len(groups))
-    w = 0.8 / len(keys)
+    w = 0.84 / len(keys)
     for j, (k, rel) in enumerate(keys):
         vals = [100 * acc(rel, keep) for _, keep in groups]
-        bars = ax.bar(x + (j - (len(keys) - 1) / 2) * w, vals, width=w, color=COLORS[k], edgecolor='black', linewidth=1.5, hatch=HATCH.get(k), label=labels[k])
+        bars = ax.bar(x + (j - (len(keys) - 1) / 2) * w, vals, width=w, color=COLORS[k], hatch=HATCH.get(k), label=labels[k], **BAR)
         for b in bars:
-            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1, f'{b.get_height():.0f}', ha='center', va='bottom', fontsize=10)
+            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1, f'{b.get_height():.0f}', ha='center', va='bottom',
+                    fontsize=FS_VAL, rotation=90, fontweight='bold' if k == 'rl_v2' else 'normal')
     ax.set_xticks(x)
-    ax.set_xticklabels([g for g, _ in groups], fontsize=14)
-    ax.axvline(3.5, color=PALETTE['gray_mid'], linewidth=1.5, linestyle=(0, (4, 4)))
-    ax.text(1.5, 106, 'by case type', ha='center', fontsize=14, color=PALETTE['gray_dark'])
-    ax.text(4.5, 106, 'by clause type', ha='center', fontsize=14, color=PALETTE['gray_dark'])
+    ax.set_xticklabels([g for g, _ in groups])
+    ax.tick_params(axis='x', length=0)
+    ax.axvline(3.5, color=PALETTE['gray_mid'], linewidth=0.6, linestyle=(0, (4, 3)))
+    ax.text(1.5, 113, 'by case type', ha='center', va='center', fontsize=7, color=PALETTE['gray_dark'], style='italic')
+    ax.text(4.5, 113, 'by clause type', ha='center', va='center', fontsize=7, color=PALETTE['gray_dark'], style='italic')
+    ax.set_xlim(-0.5, len(groups) - 0.5)
     ax.set_ylabel('Correct per clause (%)')
-    ax.set_ylim(0, 112)
-    axes[1].set_axis_off()
-    h, l = ax.get_legend_handles_labels()
-    axes[1].legend(h, l, loc='center left', fontsize=14, labelspacing=1.0, handleheight=1.3)
-    return finalize(fig, 'fig5_cases')
+    ax.set_ylim(0, 118)
+    ax.set_yticks([0, 20, 40, 60, 80, 100])
+    h, l = ax.get_legend_handles_labels()       # 3 columns: two reader columns, then ours
+    top = top_legend(fig, h, l, ncol=3, columnspacing=1.0)
+    return finalize(fig, 'fig5_cases', top=top)
 
 
 
@@ -792,14 +822,12 @@ def fig_rl_progress():
     steps = [0, 250, 500, 750, 1000]
     vir = plt.get_cmap('viridis')
     cols = {'qwen': vir(0.02), 'llama': vir(0.45), 'mistral': vir(0.74)}
-    fig, ax = plt.subplots(figsize=(9.2, 4.9))
-    ax.spines['left'].set_linewidth(1.2)
-    ax.spines['bottom'].set_linewidth(1.2)
-    ax.tick_params(width=1.2, length=4, labelsize=13, color=PALETTE['gray_dark'])
-    ax.yaxis.grid(True, color='#ECECEC', linewidth=0.9)
+    fig, ax = plt.subplots(figsize=(TW, 2.4))
+    ax.tick_params(color=PALETTE['gray_dark'])
+    ax.yaxis.grid(True, color='#ECECEC', linewidth=0.5)
     ax.set_axisbelow(True)
-    for k, lab, dash in (('qwen27b', 'Best open reader (Qwen3.8-27B)', (0, (6, 3))), ('llama70b', 'Llama-3.3-70B reader (4-bit)', (0, (1.2, 2.4)))):
-        ax.axhline(100 * S[k]['score'], color=PALETTE['gray_mid'], linewidth=1.5, linestyle=dash, zorder=1, label=lab)
+    for k, lab, dash in (('qwen27b', 'Best open reader (Qwen3.8-27B)', (0, (5, 2.5))), ('llama70b', 'Llama-3.3-70B reader (4-bit)', (0, (1, 1.8)))):
+        ax.axhline(100 * S[k]['score'], color=PALETTE['gray_mid'], linewidth=0.9, linestyle=dash, zorder=1, label=lab)
     out = {}
     for name, short, sft, ff, final in CKPT_FAMILIES:
         col = cols[short]
@@ -810,12 +838,12 @@ def fig_rl_progress():
         arr = np.array(per_seed)
         m = arr.mean(0)
         out[name] = dict(steps=steps, mean=m.tolist(), seeds=arr.tolist())
-        ax.fill_between(steps, arr.min(0), arr.max(0), color=col, alpha=0.10, linewidth=0, zorder=2)
-        ax.plot(steps, m, color=col, linewidth=2.2, marker='o', markersize=6.5, markeredgecolor='white', markeredgewidth=1.0,
+        ax.fill_between(steps, arr.min(0), arr.max(0), color=col, alpha=0.12, linewidth=0, zorder=2)
+        ax.plot(steps, m, color=col, linewidth=1.2, marker='o', markersize=3.2, markeredgecolor='white', markeredgewidth=0.5,
                 zorder=3, label=f'FormaFin, {name}')
     (OUT / 'rl_progress.json').write_text(json.dumps(out, indent=1))
-    ax.set_xlabel('GRPO training step (0 = SFT model)', fontsize=14, labelpad=8)
-    ax.set_ylabel('Correct per clause (%)', fontsize=14, labelpad=8)
+    ax.set_xlabel('GRPO training step (0 = SFT model)')
+    ax.set_ylabel('Correct per clause (%)')
     ax.set_xticks(steps)
     ax.set_xlim(-25, 1025)
     ax.set_ylim(30, 100)
@@ -824,8 +852,8 @@ def fig_rl_progress():
     order = [2, 3, 4, 0, 1]   # our three models, then the two readers
     # the lower right of the plot is empty (all curves are above 88% after step 250): the legend goes there
     ax.legend([h[i] for i in order], [l[i] for i in order], loc='lower right', bbox_to_anchor=(1.0, 0.03), ncol=1,
-              fontsize=11.5, frameon=False, handlelength=2.4, labelspacing=0.55)
-    return finalize(fig, 'fig7_rl_progress', pad=0.6)
+              frameon=False, handlelength=2.2)
+    return finalize(fig, 'fig7_rl_progress')
 
 
 def fig_reward_vs_score(window=100):
@@ -846,7 +874,7 @@ def fig_reward_vs_score(window=100):
     vir = plt.get_cmap('viridis')
     cols = {'qwen': vir(0.02), 'llama': vir(0.45), 'mistral': vir(0.74)}
     light = lambda c: tuple(1 - 0.55 * (1 - np.array(mcolors.to_rgb(c))))   # same hue, lighter (pre-blended, prints opaque)
-    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.6), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(TW, 2.2), sharey=True)
     allx, ally, rl_x, rl_y = [], [], [], []
     x = np.arange(len(steps)); w = 0.38
     for ax, (fam, (d, short)) in zip(axes, dirs.items()):
@@ -858,31 +886,29 @@ def fig_reward_vs_score(window=100):
         allx += list(xs.ravel()); ally += list(ys.ravel())
         rl_x += list(xs[:, 1:].ravel()); rl_y += list(ys[:, 1:].ravel())
         rw, sc = 100 * xs.mean(0), ys.mean(0)
-        b1 = ax.bar(x - w / 2, rw, w, color=light(col), edgecolor='black', linewidth=1.0, label='Training reward (x100)', zorder=2)
-        b2 = ax.bar(x + w / 2, sc, w, color=col, edgecolor='black', linewidth=1.0, label='Benchmark score (%)', zorder=2)
-        ax.errorbar(x - w / 2, rw, yerr=100 * xs.std(0, ddof=1), fmt='none', ecolor='black', capsize=2.5, linewidth=1, zorder=3)
-        ax.errorbar(x + w / 2, sc, yerr=ys.std(0, ddof=1), fmt='none', ecolor='black', capsize=2.5, linewidth=1, zorder=3)
+        b1 = ax.bar(x - w / 2, rw, w, color=light(col), label='Training reward (x100)', **BAR, zorder=2)
+        b2 = ax.bar(x + w / 2, sc, w, color=col, label='Benchmark score (%)', **BAR, zorder=2)
+        ax.errorbar(x - w / 2, rw, yerr=100 * xs.std(0, ddof=1), zorder=3, **ERR)
+        ax.errorbar(x + w / 2, sc, yerr=ys.std(0, ddof=1), zorder=3, **ERR)
         for bars, err in ((b1, 100 * xs.std(0, ddof=1)), (b2, ys.std(0, ddof=1))):
             for b, e in zip(bars, err):
-                ax.text(b.get_x() + b.get_width() / 2, b.get_height() + e + 1.5, f'{b.get_height():.0f}', ha='center', va='bottom', fontsize=9.5)
-        ax.set_title(fam, fontsize=14, color=col, pad=8)
+                ax.text(b.get_x() + b.get_width() / 2, b.get_height() + e + 1.5, f'{b.get_height():.0f}', ha='center', va='bottom', fontsize=FS_VAL, rotation=90)
+        ax.set_title(fam, color=col)
         ax.set_xticks(x)
-        ax.set_xticklabels(ticks, fontsize=12)
-        ax.set_xlabel('Checkpoint (GRPO step)', fontsize=12.5)
-        ax.yaxis.grid(True, color='#ECECEC', linewidth=0.9)
+        ax.set_xticklabels(ticks, fontsize=6.5)
+        ax.set_xlabel('Checkpoint (GRPO step)')
+        ax.yaxis.grid(True, color='#ECECEC', linewidth=0.5)
         ax.set_axisbelow(True)
-        ax.spines['left'].set_linewidth(1.2); ax.spines['bottom'].set_linewidth(1.2)
-        ax.tick_params(width=1.2, length=4, labelsize=12)
-    axes[0].set_ylabel('Reward (x100) / correct (%)', fontsize=13)
-    axes[0].set_ylim(0, 110)
+    axes[0].set_ylabel('Reward (x100) / correct (%)')
+    axes[0].set_ylim(0, 118)
     axes[0].set_yticks([0, 20, 40, 60, 80, 100])
     stats = dict(window=window, all=dict(n=len(allx), pearson=pearsonr(allx, ally)[0], spearman=spearmanr(allx, ally)[0]),
                  rl_only=dict(n=len(rl_x), pearson=pearsonr(rl_x, rl_y)[0], p=pearsonr(rl_x, rl_y)[1], spearman=spearmanr(rl_x, rl_y)[0]))
     (OUT / 'reward_vs_score.json').write_text(json.dumps(stats, indent=1, default=float))
-    handles = [Patch(facecolor=light(PALETTE['gray_dark']), edgecolor='black', linewidth=1.0, label='Mean training reward (x100), 100 steps before the checkpoint'),
-               Patch(facecolor=PALETTE['gray_dark'], edgecolor='black', linewidth=1.0, label='Benchmark score (% correct per clause)')]
-    fig.legend(handles=handles, loc='lower center', ncol=2, fontsize=11.5, frameon=False, bbox_to_anchor=(0.5, -0.01))
-    fig.tight_layout(pad=0.8, rect=(0, 0.08, 1, 1))
+    handles = [Patch(facecolor=light(PALETTE['gray_dark']), label='Mean training reward (x100), 100 steps before', **BAR),
+               Patch(facecolor=PALETTE['gray_dark'], label='Benchmark score (% correct per clause)', **BAR)]
+    fig.legend(handles=handles, loc='lower center', ncol=2, frameon=False, bbox_to_anchor=(0.5, 0.0))
+    fig.tight_layout(pad=0.3, rect=(0, 0.1, 1, 1))
     for ext in ('png', 'pdf'):
         fig.savefig(FIG / f'fig8_reward_vs_score.{ext}', dpi=300, facecolor='white')
     plt.close(fig)
@@ -903,27 +929,25 @@ def fig_rl_combined(window=100):
     cols = {'qwen': vir(0.02), 'llama': vir(0.45), 'mistral': vir(0.74)}
     fams = [('Qwen2.5-Coder-7B', 'qwen', RL_MODEL_DIR), ('Llama-3.1-8B', 'llama', 'llama_rl_sched_s{}'),
             ('Mistral-7B', 'mistral', 'mistral_rl_v2_s{}')]
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(14, 5.0))
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(TW, 2.25))
     for a in (ax, bx):
-        a.spines['left'].set_linewidth(1.2); a.spines['bottom'].set_linewidth(1.2)
-        a.tick_params(width=1.2, length=4, labelsize=12, color=PALETTE['gray_dark'])
-        a.yaxis.grid(True, color='#ECECEC', linewidth=0.9); a.set_axisbelow(True)
+        a.tick_params(color=PALETTE['gray_dark'])
+        a.yaxis.grid(True, color='#ECECEC', linewidth=0.5); a.set_axisbelow(True)
         a.set_xticks(steps); a.set_xlim(-25, 1025)
-        a.set_xlabel('GRPO training step (0 = SFT model)', fontsize=13)
+        a.set_xlabel('GRPO step (0 = SFT model)')
     # (a) benchmark score
-    for k, lab, dash in (('qwen27b', 'Best open reader (Qwen3.8-27B)', (0, (6, 3))), ('llama70b', 'Llama-3.3-70B reader (4-bit)', (0, (1.2, 2.4)))):
-        ax.axhline(100 * S[k]['score'], color=PALETTE['gray_mid'], linewidth=1.5, linestyle=dash, zorder=1, label=lab)
+    for k, lab, dash in (('qwen27b', 'Best open reader (Qwen3.8-27B)', (0, (5, 2.5))), ('llama70b', 'Llama-3.3-70B reader (4-bit)', (0, (1, 1.8)))):
+        ax.axhline(100 * S[k]['score'], color=PALETTE['gray_mid'], linewidth=0.9, linestyle=dash, zorder=1, label=lab)
     for fam, short, _ in fams:
         arr = np.array(prog[fam]['seeds']); m = arr.mean(0); col = cols[short]
-        ax.fill_between(steps, arr.min(0), arr.max(0), color=col, alpha=0.10, linewidth=0, zorder=2)
-        ax.plot(steps, m, color=col, linewidth=2.2, marker='o', markersize=6.5, markeredgecolor='white', markeredgewidth=1.0,
+        ax.fill_between(steps, arr.min(0), arr.max(0), color=col, alpha=0.12, linewidth=0, zorder=2)
+        ax.plot(steps, m, color=col, linewidth=1.2, marker='o', markersize=3.2, markeredgecolor='white', markeredgewidth=0.5,
                 zorder=3, label=f'FormaFin, {fam}')
-    ax.set_ylabel('Correct per clause (%)', fontsize=13)
+    ax.set_ylabel('Correct per clause (%)')
     ax.set_ylim(30, 100); ax.set_yticks([30, 40, 50, 60, 70, 80, 90, 100])
     h, l = ax.get_legend_handles_labels(); order = [2, 3, 4, 0, 1]
-    ax.legend([h[i] for i in order], [l[i] for i in order], loc='lower right', bbox_to_anchor=(1.0, 0.03), fontsize=11,
-              frameon=False, handlelength=2.4, labelspacing=0.5)
-    ax.set_title('(a) Benchmark score (test)', loc='left', fontsize=13.5, pad=8)
+    top = top_legend(fig, [h[i] for i in order], [l[i] for i in order], ncol=2, handlelength=2.2)   # ours | readers
+    ax.set_title('(a) Benchmark score (test)', loc='left')
     # (b) training reward at every step, `window`-step moving average; markers = the same `window`-step means that the
     # correlation in the text uses (step 0 = first `window` steps, i.e. the SFT model's own samples)
     for fam, short, d in fams:
@@ -937,14 +961,14 @@ def fig_rl_combined(window=100):
         n = min(len(c) for c in curves)
         arr = np.array([c[:n] for c in curves]); m = arr.mean(0)
         xs = np.arange(n) + 10
-        bx.fill_between(xs, arr.min(0), arr.max(0), color=col, alpha=0.10, linewidth=0, zorder=2)
-        bx.plot(xs, m, color=col, linewidth=1.8, alpha=0.9, zorder=3)
-        bx.plot(steps[1:], np.mean(marks_, 0)[1:], linestyle='', marker='o', markersize=6.5, color=col,
-                markeredgecolor='white', markeredgewidth=1.0, zorder=4)
-    bx.set_ylabel(f'Mean training reward (last {window} steps)', fontsize=13)
+        bx.fill_between(xs, arr.min(0), arr.max(0), color=col, alpha=0.12, linewidth=0, zorder=2)
+        bx.plot(xs, m, color=col, linewidth=0.9, alpha=0.9, zorder=3)
+        bx.plot(steps[1:], np.mean(marks_, 0)[1:], linestyle='', marker='o', markersize=3.2, color=col,
+                markeredgecolor='white', markeredgewidth=0.5, zorder=4)
+    bx.set_ylabel(f'Reward ({window}-step mean)')
     bx.set_ylim(0.5, 1.0); bx.set_yticks([0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-    bx.set_title('(b) Training reward (no labels)', loc='left', fontsize=13.5, pad=8)
-    return finalize(fig, 'fig7_rl_combined', pad=0.8)
+    bx.set_title('(b) Training reward (no labels)', loc='left')
+    return finalize(fig, 'fig7_rl_combined', top=top)
 
 
 def fig_llm_verification():
@@ -956,45 +980,49 @@ def fig_llm_verification():
         table_llm_verification()
     V = json.loads(path.read_text())
     names = list(V)
-    short = [n.replace('$^\\dagger$', '*').replace(' (4-bit)', '\n(4-bit)').replace('Claude Sonnet 5.5', 'Claude Sonnet 5.5\n(proprietary)')
-             .replace('*', '') for n in names]
-    fig, axes = plt.subplots(1, 3, figsize=(24, 6.6), gridspec_kw=dict(width_ratios=[1, 1, 0.42]))
+    two_line = {'Qwen2.5-Coder-7B': 'Qwen2.5-\nCoder-7B', 'Qwen2.5-Coder-32B': 'Qwen2.5-\nCoder-32B',
+                'Llama-3.3-70B (4-bit)': 'Llama-3.3-70B\n(4-bit)', 'Claude Sonnet 5.5': 'Claude Sonnet\n5.5 (propr.)'}
+    short = []
+    for n in names:
+        n = n.replace('$^\\dagger$', '')
+        short.append(two_line.get(n, n.replace('-', '-\n', 1) if len(n) > 11 else n))
+    # stacked panels sharing the x axis, so that every bar has room for its value at print size
+    fig, axes = plt.subplots(2, 1, figsize=(TW, 3.55), sharex=True)
     x = np.arange(len(names))
     w = 0.38
     ax = axes[0]
     a1 = [100 * V[n]['all']['llm_acc'] for n in names]
     a2 = [100 * V[n]['all']['acc_accepted'] for n in names]
-    b1 = ax.bar(x - w / 2, a1, w, color=PALETTE['neutral'], edgecolor='black', linewidth=1.5, label='LLM analysis alone')
-    b2 = ax.bar(x + w / 2, a2, w, color=PALETTE['blue_main'], edgecolor='black', linewidth=1.5, label='Answers accepted by FormaFin')
+    b1 = ax.bar(x - w / 2, a1, w, color=PALETTE['neutral'], label='LLM analysis alone', **BAR)
+    b2 = ax.bar(x + w / 2, a2, w, color=PALETTE['blue_main'], label='Answers accepted by FormaFin', **BAR)
     for bars in (b1, b2):
         for b in bars:
-            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1, f'{b.get_height():.1f}', ha='center', va='bottom', fontsize=10.5, rotation=90)
-    ax.set_title('(a) Accuracy of the answers (%)', loc='left', fontsize=17)
-    ax.set_ylim(0, 118)
-    ax.set_yticks([0, 20, 40, 60, 80, 100])
-    ax.set_xticks(x)
-    ax.set_xticklabels(short, fontsize=11, rotation=30, ha='right')
-    ax = axes[1]
-    w = 0.2
-    series = [('all', 'caught', PALETTE['green_3'], 'LLM errors caught (all clauses)'),
-              ('agreed', 'caught', PALETTE['green_2'], 'LLM errors caught (agreed clauses)'),
-              ('all', 'false_flag', PALETTE['red_strong'], 'Correct answers flagged (all clauses)'),
-              ('agreed', 'false_flag', PALETTE['red_2'], 'Correct answers flagged (agreed clauses)')]
+            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1.5, f'{b.get_height():.1f}', ha='center', va='bottom',
+                    fontsize=FS_VAL, rotation=90)
+    ax.set_title('(a) Accuracy of the answers (%)', loc='left')
+    ax.legend(loc='lower right', bbox_to_anchor=(1.0, 0.98), ncol=2)
+    w = 0.205
+    series = [('all', 'caught', PALETTE['green_3'], 'Errors caught, all clauses'),
+              ('agreed', 'caught', PALETTE['green_2'], 'Errors caught, agreed clauses'),
+              ('all', 'false_flag', PALETTE['red_strong'], 'Correct flagged, all clauses'),
+              ('agreed', 'false_flag', PALETTE['red_2'], 'Correct flagged, agreed clauses')]
+    bx = axes[1]
     for j, (grp, key, col, lab) in enumerate(series):
         vals = [100 * V[n][grp][key] for n in names]
-        bars = ax.bar(x + (j - 1.5) * w, vals, w, color=col, edgecolor='black', linewidth=1.3, label=lab)
+        bars = bx.bar(x + (j - 1.5) * w, vals, w, color=col, label=lab, **BAR)
         for b in bars:
-            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 1, f'{b.get_height():.1f}', ha='center', va='bottom', fontsize=9, rotation=90)
-    ax.set_title('(b) What the verifier flags (%)', loc='left', fontsize=17)
-    ax.set_ylim(0, 118)
-    ax.set_yticks([0, 20, 40, 60, 80, 100])
-    ax.set_xticks(x)
-    ax.set_xticklabels(short, fontsize=11, rotation=30, ha='right')
-    axes[2].set_axis_off()
-    h = axes[0].get_legend_handles_labels()[0] + ax.get_legend_handles_labels()[0]
-    l = axes[0].get_legend_handles_labels()[1] + ax.get_legend_handles_labels()[1]
-    axes[2].legend(h, l, loc='center left', fontsize=13, labelspacing=1.0, handleheight=1.3)
-    return finalize(fig, 'fig6_llm_verification')
+            bx.text(b.get_x() + b.get_width() / 2, b.get_height() + 1.5, f'{b.get_height():.1f}', ha='center', va='bottom',
+                    fontsize=FS_VAL, rotation=90)
+    bx.set_title('(b) What the verifier flags (%)', loc='left', pad=19)   # above the two-row legend
+    bx.legend(loc='lower right', bbox_to_anchor=(1.0, 0.97), ncol=2, columnspacing=1.0)
+    for a in axes:
+        a.set_ylim(0, 122)
+        a.set_yticks([0, 20, 40, 60, 80, 100])
+        a.tick_params(axis='x', length=0)
+    bx.set_xticks(x)
+    bx.set_xticklabels(short, fontsize=6.5, linespacing=1.0)
+    bx.set_xlim(-0.55, len(names) - 0.45)
+    return finalize(fig, 'fig6_llm_verification', pad=0.3)
 
 
 # --------------------------------------------------------------------------------------------- overview figure
@@ -1005,22 +1033,23 @@ EXAMPLE = ('fin_320522', '-1%')  # LINC Logistics (2011): four covenants; the ca
 TIKZ_OVERVIEW = r"""
 \begin{document}
 \begin{tikzpicture}[
-    font=\fontsize{8}{10}\selectfont, >={Stealth[length=2.2mm,width=1.7mm]},
+    % Drawn about 16 cm wide and included at \textwidth (12.2 cm): a size here prints at ~0.77x.
+    font=\fontsize{9}{10.5}\selectfont, >={Stealth[length=2.2mm,width=1.7mm]},
     panelbox/.style={draw=teal, dash pattern=on 2.4pt off 1.8pt, line width=0.9pt, rounded corners=7pt, fill=panel},
-    head/.style={font=\fontsize{11}{13}\selectfont\lsstyle, color=ink, anchor=south},
-    block/.style={draw=ink, line width=0.8pt, rounded corners=6pt, minimum width=4.4cm, minimum height=0.95cm,
-                  anchor=north west, font=\fontsize{11.5}{13}\selectfont\bfseries},
+    head/.style={font=\fontsize{11}{13}\selectfont, color=ink, anchor=south},
+    block/.style={draw=ink, line width=0.8pt, rounded corners=6pt, minimum width=4.35cm, minimum height=0.9cm,
+                  anchor=north west, font=\fontsize{11}{13}\selectfont\bfseries},
     inset/.style={draw=ink, line width=0.6pt, rounded corners=5pt, fill=white, anchor=north west, inner sep=0pt},
-    listing/.style={fill=ink!4, rounded corners=2pt, inner xsep=5pt, inner ysep=4pt, anchor=north west,
+    listing/.style={fill=ink!4, rounded corners=2pt, inner xsep=4pt, inner ysep=3.5pt, anchor=north west,
                     path picture={\fill[teal] (path picture bounding box.north west) rectangle
                                   ([xshift=1.4pt]path picture bounding box.south west);}},
-    chipfill/.style={draw=#1, fill=#1!12, text=ink, rounded corners=1.8pt, line width=0.6pt, inner xsep=4pt, inner ysep=1.8pt,
-                 font=\fontsize{7.6}{9}\selectfont},
+    chipfill/.style={draw=#1, fill=#1!12, text=ink, rounded corners=1.8pt, line width=0.6pt, inner xsep=2.5pt, inner ysep=1.8pt,
+                 font=\fontsize{8.1}{9.5}\selectfont},
     tag/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=3pt,
-                inner ysep=1.3pt, text height=1.6ex, text depth=0.25ex, font=\fontsize{7}{8}\selectfont},
-    mstep/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=4pt,
-                 inner ysep=2pt, font=\fontsize{7.6}{9}\selectfont, anchor=west},
-    lab/.style={font=\fontsize{8}{9.5}\selectfont, color=black, align=left},
+                inner ysep=1.5pt, text height=1.6ex, text depth=0.25ex, font=\fontsize{8.6}{9.5}\selectfont},
+    mstep/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=3pt,
+                 inner ysep=2pt, font=\fontsize{8.2}{9.5}\selectfont, anchor=west},
+    lab/.style={font=\fontsize{9}{10.5}\selectfont, color=black, align=left},
     flow/.style={->, line width=0.7pt, color=ink, rounded corners=4pt},
     tie/.style={line width=0.6pt, color=ink, rounded corners=4pt},
   ]
@@ -1029,18 +1058,18 @@ TIKZ_OVERVIEW = r"""
   \definecolor{oiorange}{HTML}{AA4499}  % (a) by hand
   \definecolor{oipurple}{HTML}{DDCC77}  % (b) reading directly
   \definecolor{oiblue}{HTML}{0072B2}    % (c) formalize, then solve
-  \newcommand{\lno}[1]{{\color{teal}\fontsize{6.4}{7}\selectfont\ttfamily #1}}
-  \def\P{5.6}     % width of panel (a)
+  \newcommand{\lno}[1]{{\color{teal}\fontsize{7}{8}\selectfont\ttfamily #1}}
+  \def\P{5.3}     % width of the left panel
   \def\G{1.35}    % gap between columns
-  \def\W{11.0}    % width of panels (b)-(d)
-  \def\Bt{-3.15}  % top of panel (b)
-  \def\Ct{-6.3}   % top of panel (c)
-  \def\B{-10.55}  % bottom of all panels
+  \def\W{9.95}    % width of panels (a)-(c)
+  \def\Bt{-3.3}   % top of panel (b)
+  \def\Ct{-6.6}   % top of panel (c)
+  \def\B{-11.3}   % bottom of all panels
   \pgfmathsetmacro\R{\P+\G}
   \begin{scope}[on background layer]
     \draw[panelbox] (0,0) rectangle (\P,\B);
-    \draw[panelbox, draw=oiorange, fill=oiorange!9] (\R,0) rectangle (\R+\W,-2.3);
-    \draw[panelbox, draw=oipurple, fill=oipurple!10] (\R,\Bt) rectangle (\R+\W,\Bt-2.3);
+    \draw[panelbox, draw=oiorange, fill=oiorange!9] (\R,0) rectangle (\R+\W,-2.45);
+    \draw[panelbox, draw=oipurple, fill=oipurple!10] (\R,\Bt) rectangle (\R+\W,\Bt-2.45);
     \draw[panelbox, draw=oiblue, fill=oiblue!7] (\R,\Ct) rectangle (\R+\W,\B);
   \end{scope}
   \node[head] at ({\P/2}, 0.1) {THE QUARTERLY CHECK};
@@ -1048,29 +1077,29 @@ TIKZ_OVERVIEW = r"""
   \node[head] at ({\R+\W/2}, \Bt+0.1) {(b) READING DIRECTLY};
   \node[head] at ({\R+\W/2}, \Ct+0.1) {(c) FORMALIZE, THEN SOLVE};
 
-  % ================================================================ (a) clause, certificate, questions
-  \node[block, fill=white] (cl) at (0.3,-0.35) {\hspace*{0.75cm}Covenant clause};
-  \node at ($(cl.west)+(0.5,0)$) {\ico{\faFileContract}};
-  \node[inset, minimum width=4.45cm, minimum height=2.45cm] (c1) at (0.85,-1.45) {};
-  \draw[tie] (0.62,-1.3) |- (c1.west);
-  \node[listing, text width=3.95cm] at (0.97,-1.57) {%
-    \fontsize{7.0}{9.0}\selectfont\itshape
-    \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
+  % ================================================================ clause, certificate, questions
+  \node[block, fill=white] (cl) at (0.2,-0.3) {\hspace*{0.6cm}Covenant clause};
+  \node at ($(cl.west)+(0.45,0)$) {\ico{\faFileContract}};
+  \node[inset, minimum width={(\P-0.75)*1cm}, minimum height=2.6cm] (c1) at (0.55,-1.4) {};
+  \draw[tie] (0.42,-1.2) |- (c1.west);
+  \node[listing, text width={(\P-1.2)*1cm}] at (0.65,-1.5) {%
+    \fontsize{7.6}{9.6}\selectfont\itshape
+    \begin{tabular}{@{}r@{\hspace{4pt}}l@{}}
     \lno{1} & <<COMPANY>> (<<YEAR>>), \S\,7.9\\
     \lno{2} & (a) a Senior Debt to EBITDA\\
-    \lno{3} & \ \ Ratio of not more than 2.5 to 1.0.\\
+    \lno{3} & \ Ratio of not more than 2.5 to 1.0.\\
     \lno{4} & (b) a Total Debt to EBITDA\\
-    \lno{5} & \ \ Ratio of not more than 3.0 to 1.0.\\
+    \lno{5} & \ Ratio of not more than 3.0 to 1.0.\\
     \lno{6} & (c), (d) two fixed-charge ratios \ldots
     \end{tabular}};
 
-  \node[block, fill=white] (ce) at (0.3,-4.35) {\hspace*{0.75cm}Compliance certificate};
-  \node at ($(ce.west)+(0.5,0)$) {\ico{\faFileInvoiceDollar}};
-  \node[inset, minimum width=4.45cm, minimum height=2.15cm] (c2) at (0.85,-5.45) {};
-  \draw[tie] (0.62,-5.3) |- (c2.west);
-  \node[listing, text width=3.95cm] at (0.97,-5.52) {%
-    \fontsize{7.4}{9.2}\selectfont
-    \begin{tabular}{@{}r@{\hspace{5pt}}l@{\hspace{8pt}}r@{}}
+  \node[block, fill=white] (ce) at (0.2,-4.55) {\hspace*{0.6cm}Compliance certificate};
+  \node at ($(ce.west)+(0.45,0)$) {\ico{\faFileInvoiceDollar}};
+  \node[inset, minimum width={(\P-0.75)*1cm}, minimum height=2.3cm] (c2) at (0.55,-5.65) {};
+  \draw[tie] (0.42,-5.45) |- (c2.west);
+  \node[listing, text width={(\P-1.2)*1cm}] at (0.65,-5.75) {%
+    \fontsize{8.4}{10}\selectfont
+    \begin{tabular}{@{}r@{\hspace{4pt}}l@{\hspace{8pt}}r@{}}
     \lno{1} & Test date & <<DATE>>\\
     \lno{2} & EBITDA & \$<<EBITDA>>M\\
     \lno{3} & Senior debt & \$<<SENIOR>>M\\
@@ -1078,71 +1107,71 @@ TIKZ_OVERVIEW = r"""
     \lno{5} & \multicolumn{2}{l}{+ two fixed-charge items}
     \end{tabular}};
 
-  \node[block, fill=white] (qs) at (0.3,-8.15) {\hspace*{0.75cm}Three questions};
-  \node at ($(qs.west)+(0.5,0)$) {\ico{\faQuestionCircle}};
-  \node[inset, minimum width=4.45cm, minimum height=0.75cm] (c3) at (0.85,-9.25) {};
-  \draw[tie] (0.62,-9.1) |- (c3.west);
-  % three equal-width tags spread evenly across the card (inner span 1.05--5.1)
+  \node[block, fill=white] (qs) at (0.2,-8.6) {\hspace*{0.6cm}Three questions};
+  \node at ($(qs.west)+(0.45,0)$) {\ico{\faQuestionCircle}};
+  \node[inset, minimum width={(\P-0.75)*1cm}, minimum height=0.8cm] (c3) at (0.55,-9.75) {};
+  \draw[tie] (0.42,-9.55) |- (c3.west);
+  % three equal-width tags spread evenly across the card
   \foreach \q [count=\j] in {status, cushion, capacity}
-    \node[tag, minimum width=1.23cm, align=center] at ({1.05 + 0.615 + (\j-1)*1.41}, -9.625) {\q};
+    \node[tag, minimum width=1.25cm, align=center] at ({0.55 + 0.75 + (\j-1)*1.42}, -10.15) {\q};
 
-  % ================================================================ (b) by hand
-  \node[block, fill=white] (an) at (\R+0.3,-0.35) {\hspace*{0.75cm}Credit analyst};
-  \node at ($(an.west)+(0.5,0)$) {\ico{\faUserTie}};
-  \node[lab, anchor=west] at (\R+5.05,-0.83) {works through each covenant by hand,\\for every loan and every quarter};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.8cm] (h1) at (\R+0.85,-1.35) {};
-  \draw[tie] (\R+0.62,-1.3) |- (h1.west);
-  \node[mstep] (m1) at (\R+1.05,-1.75) {1\ \ read the clause};
-  \node[mstep] (m2) at ($(m1.east)+(0.45,0)$) {2\ \ compute each ratio};
-  \node[mstep] (m3) at ($(m2.east)+(0.45,0)$) {3\ \ solve for cushion, capacity};
+  % ================================================================ (a) by hand
+  \node[block, fill=white, minimum width=4.0cm] (an) at (\R+0.2,-0.3) {\hspace*{0.6cm}Credit analyst};
+  \node at ($(an.west)+(0.45,0)$) {\ico{\faUserTie}};
+  \node[lab, anchor=west] at (\R+4.45,-0.75) {every covenant by hand,\\every loan, every quarter};
+  \node[inset, minimum width={(\W-0.75)*1cm}, minimum height=0.85cm] (h1) at (\R+0.55,-1.4) {};
+  \draw[tie] (\R+0.42,-1.2) |- (h1.west);
+  \node[mstep] (m1) at (\R+0.7,-1.825) {1\ \ read the clause};
+  \node[mstep] (m2) at ($(m1.east)+(0.32,0)$) {2\ \ compute each ratio};
+  \node[mstep] (m3) at ($(m2.east)+(0.32,0)$) {3\ \ solve for the answers};
   \draw[flow] (m1.east) -- (m2.west);
   \draw[flow] (m2.east) -- (m3.west);
 
-  % ================================================================ (c) reading directly
-  \node[block, fill=white] (rd) at (\R+0.3,\Bt-0.35) {\hspace*{0.75cm}7B model reads};
-  \node at ($(rd.west)+(0.5,0)$) {\ico{\faRobot}};
-  \node[lab, anchor=west] at (\R+5.05,\Bt-0.83) {reasons over clause and figures in text,\\again for every certificate};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.8cm] (b1) at (\R+0.85,\Bt-1.35) {};
-  \draw[tie] (\R+0.62,\Bt-1.3) |- (b1.west);
-  \node[chipfill=good, anchor=west] (s1) at (\R+1.05,\Bt-1.75) {status: <<D7STATUS>>\ \ok};
-  \node[chipfill=bad, anchor=west] (s2) at ($(s1.east)+(0.2,0)$) {cushion: <<D7CUSHION>>\ \no\ \ (true <<RCUSHION>>)};
-  \node[chipfill=good, anchor=west] at ($(s2.east)+(0.2,0)$) {capacity: <<D7CAPACITY>>M USD\ \ok};
+  % ================================================================ (b) reading directly
+  \node[block, fill=white, minimum width=4.0cm] (rd) at (\R+0.2,\Bt-0.3) {\hspace*{0.6cm}7B model reads};
+  \node at ($(rd.west)+(0.45,0)$) {\ico{\faRobot}};
+  \node[lab, anchor=west] at (\R+4.45,\Bt-0.75) {reasons over the text,\\again for every certificate};
+  \node[inset, minimum width={(\W-0.75)*1cm}, minimum height=0.85cm] (b1) at (\R+0.55,\Bt-1.4) {};
+  \draw[tie] (\R+0.42,\Bt-1.2) |- (b1.west);
+  \node[chipfill=good, anchor=west] (s1) at (\R+0.7,\Bt-1.825) {status: <<D7STATUS>>\,\ok};
+  \node[chipfill=bad, anchor=west] (s2) at ($(s1.east)+(0.12,0)$) {cushion: <<D7CUSHION>>\,\no\ (true <<RCUSHION>>)};
+  \node[chipfill=good, anchor=west] at ($(s2.east)+(0.12,0)$) {capacity: <<D7CAPACITY>>M\,\ok};
 
-  % ================================================================ (d) formalize, then solve
-  \node[block, fill=white] (af) at (\R+0.3,\Ct-0.35) {\hspace*{0.75cm}AutoFormalizer (7B)};
-  \node at ($(af.west)+(0.5,0)$) {\ico{\faServer}};
-  \node[inset, minimum width=5.85cm, minimum height=2.75cm] (f1) at (\R+0.85,\Ct-1.35) {};
-  \draw[tie] (\R+0.62,\Ct-1.3) |- (f1.west);
-  \node[listing, text width=5.35cm] at (\R+0.97,\Ct-1.47) {%
-    \fontsize{6.6}{8.6}\selectfont\ttfamily
-    \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
+  % ================================================================ (c) formalize, then solve
+  \node[block, fill=white, minimum width=4.45cm] (af) at (\R+0.2,\Ct-0.3) {\hspace*{0.6cm}AutoFormalizer (7B)};
+  \node at ($(af.west)+(0.45,0)$) {\ico{\faServer}};
+  \node[inset, minimum width=5.95cm, minimum height=3.0cm] (f1) at (\R+0.55,\Ct-1.4) {};
+  \draw[tie] (\R+0.42,\Ct-1.2) |- (f1.west);
+  \node[listing, text width=5.45cm] at (\R+0.65,\Ct-1.5) {%
+    \fontsize{7.2}{9.2}\selectfont\ttfamily
+    \begin{tabular}{@{}r@{\hspace{4pt}}l@{}}
     \lno{1} & (define-fun covenant\_holds\\
-    \lno{2} & \ \ ((ebitda Real) (senior\_debt Real)\\
-    \lno{3} & \ \ \ (total\_debt Real) ... (test\_date Int))\\
-    \lno{4} & \ \ Bool\\
-    \lno{5} & \ \ (and (<= (/ senior\_debt ebitda) 2.5)\\
-    \lno{6} & \ \ \ \ \ \ \ (<= (/ total\_debt ebitda) 3.0)\\
-    \lno{7} & \ \ \ \ \ \ \ ...))
+    \lno{2} & \ ((ebitda Real) (senior\_debt Real)\\
+    \lno{3} & \ \ (total\_debt Real) ... (test\_date Int))\\
+    \lno{4} & \ Bool\\
+    \lno{5} & \ (and (<= (/ senior\_debt ebitda) 2.5)\\
+    \lno{6} & \ \ \ \ \ \ (<= (/ total\_debt ebitda) 3.0)\\
+    \lno{7} & \ \ \ \ \ \ ...))
     \end{tabular}};
 
-  \node[block, fill=sky, minimum width=3.75cm] (z3) at (\R+6.95,\Ct-0.35) {\hspace*{0.75cm}Z3 solver};
-  \node at ($(z3.west)+(0.5,0)$) {\ico{\faCogs}};
-  \draw[flow] (af.east) -- node[lab, above=1pt] {formula, once} (z3.west);
-  \node[inset, minimum width=3.2cm, minimum height=2.75cm] (z1) at (\R+7.5,\Ct-1.35) {};
-  \draw[tie] (\R+7.27,\Ct-1.3) |- (z1.west);
-  \node[anchor=north west, font=\fontsize{8}{10}\selectfont\bfseries, align=left] at (\R+7.65,\Ct-1.5)
+  \node[block, fill=sky, minimum width=2.95cm] (z3) at (\R+6.8,\Ct-0.3) {\hspace*{0.6cm}Z3 solver};
+  \node at ($(z3.west)+(0.45,0)$) {\ico{\faCogs}};
+  \draw[flow] (af.east) -- node[lab, above=1pt, font=\fontsize{8.4}{9.5}\selectfont] {formula, once} (z3.west);
+  \node[inset, minimum width=2.7cm, minimum height=3.0cm] (z1) at (\R+7.05,\Ct-1.4) {};
+  \draw[tie] (\R+6.92,\Ct-1.2) |- (z1.west);
+  \node[anchor=north west, font=\fontsize{9}{10.5}\selectfont\bfseries, align=left] at (\R+7.08,\Ct-1.5)
        {every quarter:};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.25) {status: <<OSTATUS>>\ \ok};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.9) {cushion: <<OCUSHION>>\ \ok};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.55) {capacity: <<OCAPACITY>>M USD\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.08,\Ct-2.35) {status: <<OSTATUS>>\,\ok};
+  \node[chipfill=good, anchor=west] at (\R+7.08,\Ct-3.0) {cushion: <<OCUSHION>>\,\ok};
+  \node[chipfill=good, anchor=west] at (\R+7.08,\Ct-3.65) {capacity: <<OCAPACITY>>M\,\ok};
 
-  % ================================================================ inputs to (b), (c) and (d)
-  \draw[flow] (\P,-0.825) -- node[lab, above=1pt, align=center] {clause\\+ figures} (an.west);
-  \draw[flow] (\P,\Bt-0.825) -- node[lab, above=1pt, align=center] {clause\\+ figures} (rd.west);
-  \draw[flow] (\P,\Ct-0.825) -- node[lab, above=1pt] {clause} (af.west);
+  % ================================================================ inputs to (a), (b) and (c)
+  \draw[flow] (\P,-0.75) -- node[lab, above=1pt, align=center, font=\fontsize{8.6}{9.5}\selectfont] {clause\\+ figures} (an.west);
+  \draw[flow] (\P,\Bt-0.75) -- node[lab, above=1pt, align=center, font=\fontsize{8.6}{9.5}\selectfont] {clause\\+ figures} (rd.west);
+  \draw[flow] (\P,\Ct-0.75) -- node[lab, above=1pt, font=\fontsize{8.6}{9.5}\selectfont] {clause} (af.west);
 
   \begin{pgfonlayer}{page}
-    \fill[white] ([shift={(-6pt,-6pt)}]current bounding box.south west) rectangle ([shift={(6pt,6pt)}]current bounding box.north east);
+    \fill[white] ([shift={(-1pt,-1pt)}]current bounding box.south west) rectangle ([shift={(1pt,1pt)}]current bounding box.north east);
   \end{pgfonlayer}
 \end{tikzpicture}
 \end{document}
@@ -1190,7 +1219,7 @@ def fig_overview_tex():
 TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_method_tex).
 % Method figure. Stage I: distill a teacher into SFT; Stage II: GRPO with a Z3-checked reward; Stage III: verify once,
 % run every quarter in-house. Compile with pdflatex; needs the fontawesome5 package (CTAN).
-\documentclass[tikz,border=8pt]{standalone}
+\documentclass[tikz,border=1pt]{standalone}
 \usepackage[LGR,T1]{fontenc}
 \DeclareFontSubstitution{LGR}{SourceSansThree-LF}{m}{n}
 \usepackage[semibold]{sourcesans}   % one humanist sans for text and math
@@ -1226,29 +1255,27 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
 
 \begin{document}
 \begin{tikzpicture}[
-    font=\fontsize{8}{10}\selectfont, >={Stealth[length=2.2mm,width=1.7mm]},
+    % Drawn about 16 cm wide and included at \textwidth (12.2 cm), i.e. scaled by ~0.77: a size here prints at 0.77x.
+    font=\fontsize{8.8}{10.5}\selectfont, >={Stealth[length=2.2mm,width=1.7mm]},
     panelbox/.style={draw=teal, dash pattern=on 2.4pt off 1.8pt, line width=0.9pt, rounded corners=7pt, fill=panel},
-    head/.style={font=\fontsize{11}{13}\selectfont\lsstyle, color=ink, anchor=south},
-    block/.style={draw=ink, line width=0.8pt, rounded corners=6pt, minimum width=4.4cm, minimum height=0.95cm,
+    head/.style={font=\fontsize{11}{13}\selectfont, color=ink, anchor=south},
+    block/.style={draw=ink, line width=0.8pt, rounded corners=6pt, minimum width=3.95cm, minimum height=0.9cm,
                   anchor=north west, font=\fontsize{11.5}{13}\selectfont\bfseries},
-    inset/.style={draw=ink, line width=0.6pt, rounded corners=5pt, fill=white, anchor=north west, minimum width=3.85cm,
+    inset/.style={draw=ink, line width=0.6pt, rounded corners=5pt, fill=white, anchor=north west, minimum width=3.55cm,
                   inner sep=0pt},
-    itext/.style={anchor=north west, text width=3.6cm, align=left, inner sep=0pt},
-    chip/.style={draw=#1, text=#1, fill=white, rounded corners=1.8pt, line width=0.6pt, inner xsep=4pt, inner ysep=1.6pt,
-                 font=\fontsize{7.3}{8}\selectfont},
-    chipfill/.style={draw=#1, fill=#1!12, text=#1, rounded corners=1.8pt, line width=0.6pt, inner xsep=4pt, inner ysep=1.6pt,
-                 font=\fontsize{7.3}{8}\selectfont},
-    tag/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=2pt,
-                inner ysep=1.3pt, minimum width=1.0cm, align=center, text height=1.6ex, text depth=0.25ex,
-                font=\fontsize{6.8}{8}\selectfont},
-    lab/.style={font=\fontsize{8}{9.5}\selectfont, color=black, align=left},
+    itext/.style={anchor=north west, text width=3.35cm, align=left, inner sep=0pt},
+    chip/.style={draw=#1, text=#1, fill=white, rounded corners=1.8pt, line width=0.6pt, inner xsep=3pt, inner ysep=1.6pt,
+                 font=\fontsize{8.4}{9}\selectfont},
+    chipfill/.style={draw=#1, fill=#1!12, text=#1, rounded corners=1.8pt, line width=0.6pt, inner xsep=3pt, inner ysep=1.6pt,
+                 font=\fontsize{8.4}{9}\selectfont},
+    lab/.style={font=\fontsize{8.8}{10}\selectfont, color=black, align=left},
     flow/.style={->, line width=0.7pt, color=ink, rounded corners=4pt},
     tie/.style={line width=0.6pt, color=ink, rounded corners=4pt},
   ]
-  \def\P{5.0}  % width of Stages I and III
-  \def\W{6.9}  % width of Stage II
-  \def\G{1.35} % gap between panels
-  \def\B{-9.15}% panel bottom
+  \def\P{4.35}  % width of Stages I and III
+  \def\W{6.1}   % width of Stage II
+  \def\G{0.75}  % gap between panels
+  \def\B{-9.75} % panel bottom
   \pgfmathsetmacro\Lb{\P+\G}
   \pgfmathsetmacro\Lc{\P+\W+2*\G}
   \begin{scope}[on background layer]
@@ -1262,99 +1289,99 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
 
   % ================================================================ Stage I
   \def\L{0}
-  \node[block, fill=white] (teacher) at (\L+0.3,-0.35) {\phantom{x}Teacher model};
-  \node at ($(teacher.west)+(0.5,0)$) {\ico{\faRobot}};
-  \node[inset, minimum height=2.2cm] (t1) at (\L+0.85,-1.7) {};
-  \node[itext] at (\L+1.0,-1.95) {%
-    {\bfseries teacher $\varphi$ for $x\in\mathcal{C}$, kept if}\\[6pt]
+  \node[block, fill=white] (teacher) at (\L+0.2,-0.3) {\hspace*{0.6cm}Teacher model};
+  \node at ($(teacher.west)+(0.45,0)$) {\ico{\faRobot}};
+  \node[inset, minimum height=2.3cm] (t1) at (\L+0.6,-1.55) {};
+  \node[itext] at (\L+0.72,-1.7) {%
+    {\bfseries teacher's $\varphi$ kept if}\\[5pt]
     \yes\ Z3 parses it\\[1pt]
-    \yes\ semantic review agrees\\[1pt]
+    \yes\ semantics reviewed\\[1pt]
     \yes\ parameters grounded};
-  \draw[tie] (\L+0.62,-1.3) |- (t1.west);
-  \node[block, fill=mint] (sft) at (\L+0.3,-4.7) {\phantom{x}SFT};
-  \node at ($(sft.west)+(0.5,0)$) {\ico{\faGraduationCap}};
-  \draw[flow] (\L+0.4,-1.3) -- (\L+0.4,-4.7);
-  \node[lab, anchor=west] at (\L+0.55,-4.32) {filtered pairs $\mathcal{D}$};
-  \node[inset, minimum height=2.75cm] (t2) at (\L+0.85,-6.05) {};
-  \node[itext] at (\L+1.0,-6.2) {{\bfseries\boldmath $(x,\varphi)\in\mathcal{D}$}};
-  \node[tag, anchor=base west] at (\L+0.98,-6.84) {clause};
-  \node[anchor=base west, text width=2.6cm, align=left, inner sep=0pt, font=\fontsize{7.0}{8.6}\selectfont\itshape]
-       at (\L+2.06,-6.84) {``Total Debt to EBITDA\\\mbox{\ldots\,not more than $t$ to 1''}};
-  \node[tag, anchor=base west] at (\L+0.98,-7.6) {SMT};
-  \node[anchor=base west, inner sep=0pt, font=\fontfamily{lmvtt}\fontsize{6.9}{9}\selectfont]
-       at (\L+2.06,-7.6) {(<= (/ debt ebitda) $t$)};
-  \node[anchor=west, font=\fontsize{7.4}{9}\selectfont] at (\L+0.98,-8.02)
+  \draw[tie] (\L+0.42,-1.2) |- (t1.west);
+  \node[block, fill=mint] (sft) at (\L+0.2,-4.6) {\hspace*{0.3cm}SFT};
+  \node at ($(sft.west)+(0.45,0)$) {\ico{\faGraduationCap}};
+  \draw[flow] (\L+0.3,-1.2) -- (\L+0.3,-4.6);
+  \node[lab, anchor=west] at (\L+0.45,-4.2) {filtered pairs $\mathcal{D}$};
+  \node[inset, minimum height=3.4cm] (t2) at (\L+0.6,-5.9) {};
+  \node[itext] at (\L+0.72,-6.05) {{\bfseries\boldmath $(x,\varphi)\in\mathcal{D}$}};
+  \node[anchor=north west, inner sep=0pt, font=\fontsize{8.8}{10.5}\selectfont] at (\L+0.72,-6.55) {$x$:};
+  \node[anchor=north west, text width=3.0cm, align=left, inner sep=0pt, font=\fontsize{8}{10}\selectfont\itshape]
+       at (\L+1.05,-6.55) {``Total Debt to EBITDA \ldots\ not more than $t$ to 1''};
+  \node[anchor=north west, inner sep=0pt, font=\fontsize{8.8}{10.5}\selectfont] at (\L+0.72,-7.6) {$\varphi$:};
+  \node[anchor=north west, inner sep=0pt, font=\fontfamily{lmvtt}\fontsize{8.2}{10}\selectfont]
+       at (\L+1.05,-7.6) {(<= (/ debt ebitda) $t$)};
+  \node[anchor=north west, inner sep=0pt, font=\fontsize{8.6}{10}\selectfont] at (\L+0.72,-8.4)
        {$\mathcal{L}_{\mathrm{SFT}}=-\,\mathbb{E}_{\mathcal{D}}\log\pi_\theta(\varphi\mid x)$};
-  \draw[tie] (\L+0.62,-5.65) |- (t2.west);
+  \draw[tie] (\L+0.42,-5.5) |- (t2.west);
 
   % ================================================================ Stage II
   \def\L{\Lb}
-  \node[block, fill=mint, minimum width={(\W-0.6)*1cm}] (grpo) at (\L+0.3,-0.35) {\phantom{x}Policy $\pi_\theta$};
-  \node at ($(grpo.west)+(0.5,0)$) {\ico{\faDiceFour}};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=2.2cm] (g1) at (\L+0.85,-1.7) {};
-  \node[itext, text width={(\W-1.45)*1cm}] at (\L+1.0,-1.85) {{\bfseries $G$ samples per clause in $\mathcal{C}'$}};
-  \draw[tie] (\L+0.62,-1.3) |- (g1.west);
+  \node[block, fill=mint, minimum width={(\W-0.4)*1cm}] (grpo) at (\L+0.2,-0.3) {\hspace*{0.3cm}Policy $\pi_\theta$};
+  \node at ($(grpo.west)+(0.45,0)$) {\ico{\faDiceFour}};
+  \node[inset, minimum width={(\W-0.8)*1cm}, minimum height=2.3cm] (g1) at (\L+0.6,-1.55) {};
+  \node[itext, text width={(\W-1.05)*1cm}] at (\L+0.72,-1.7) {{\bfseries $G$ samples per clause in $\mathcal{C}'$}};
+  \draw[tie] (\L+0.42,-1.2) |- (g1.west);
   \foreach \k [count=\j] in {1, 2, 3, G} {
-    \pgfmathsetmacro\x{\L+1.75+(\j-1)*1.25+(\j==4)*0.5}
-    \node[color=mintdark] at (\x,-2.55) {\fontsize{11}{11}\selectfont\faFileCode[regular]};
-    \node[color=mintdark, font=\fontsize{7.4}{8}\selectfont] at (\x,-2.98) {$\varphi_\k$};
-    \node[chipfill=skydark] at (\x,-3.42) {$r_\k$};
+    \pgfmathsetmacro\x{\L+1.35+(\j-1)*1.12+(\j==4)*0.6}
+    \node[color=mintdark] at (\x,-2.45) {\fontsize{12}{12}\selectfont\faFileCode[regular]};
+    \node[color=mintdark, font=\fontsize{8.8}{9}\selectfont] at (\x,-2.93) {$\varphi_\k$};
+    \node[chipfill=skydark] at (\x,-3.4) {$r_\k$};
   }
-  \node[color=ink] at (\L+5.0,-2.98) {$\cdots$};
+  \node[color=ink] at (\L+4.6,-2.93) {$\cdots$};
 
-  \node[block, fill=sky, minimum width={(\W-0.6)*1cm}] (z3) at (\L+0.3,-4.7) {\phantom{x}Reward $r(\varphi)$};
-  \node at ($(z3.west)+(0.5,0)$) {\ico{\faCogs}};
-  \draw[flow] (\L+0.4,-1.3) -- (\L+0.4,-4.7);
-  \draw[flow] (\L+0.22,-4.7) -- (\L+0.22,-1.3);
-  \node[lab, anchor=west] at (\L+0.55,-4.32) {$\varphi_i\downarrow$\ \ $r_i\uparrow$};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=2.75cm] (g2) at (\L+0.85,-6.05) {};
-  \draw[tie] (\L+0.62,-5.65) |- (g2.west);
-  \node[itext, text width={(\W-1.45)*1cm}] at (\L+1.0,-6.2) {{\bfseries each limit}\ \ $\tau\le t$, at every date \& condition};
+  \node[block, fill=sky, minimum width={(\W-0.4)*1cm}] (z3) at (\L+0.2,-4.6) {\hspace*{0.3cm}Reward $r(\varphi)$};
+  \node at ($(z3.west)+(0.45,0)$) {\ico{\faCogs}};
+  \draw[flow] (\L+0.3,-1.2) -- (\L+0.3,-4.6);
+  \draw[flow] (\L+0.14,-4.6) -- (\L+0.14,-1.2);
+  \node[lab, anchor=west] at (\L+0.45,-4.2) {$\varphi_i\downarrow$\ \ $r_i\uparrow$};
+  \node[inset, minimum width={(\W-0.8)*1cm}, minimum height=3.4cm] (g2) at (\L+0.6,-5.9) {};
+  \draw[tie] (\L+0.42,-5.5) |- (g2.west);
+  \node[itext, text width={(\W-1.05)*1cm}] at (\L+0.72,-6.05) {{\bfseries each limit} $\tau\le t$,\\ at every date and condition};
   % each scenario fixes the constrained quantity tau; the solver checks phi there (and, at the breach side, also not-phi,
   % so that a formula that is always false cannot pass)
   \foreach \n/\q/\a/\c/\m [count=\j] in {compliant/(1-\delta)\,t/SAT/good/\okc, boundary/t/SAT/good/\okc, breach/(1+\delta)\,t/UNSAT/bad/\noc} {
-    \pgfmathsetmacro\x{\L+1.95+(\j-1)*1.75}
-    \node[font=\fontsize{7.4}{8}\selectfont\bfseries] at (\x,-6.72) {\n};
-    \node[font=\fontsize{7.2}{8}\selectfont] at (\x,-7.07) {$\tau=\q$};
-    \node[chipfill=\c, text=ink] at (\x,-7.48) {$\textcolor{mintdark}{\varphi}$:\ \a\ \m};
+    \pgfmathsetmacro\x{\L+1.45+(\j-1)*1.68}
+    \node[font=\fontsize{8.8}{9}\selectfont\bfseries] at (\x,-6.97) {\n};
+    \node[font=\fontsize{8.6}{9}\selectfont] at (\x,-7.33) {$\tau=\q$};
+    \node[chipfill=\c, text=ink] at (\x,-7.77) {$\textcolor{mintdark}{\varphi}$:\,\a\,\m};
   }
-  \node[chipfill=good, text=ink] at (\L+1.95+2*1.75,-7.98) {$\neg\textcolor{mintdark}{\varphi}$:\ SAT\ \okc};
-  \node[anchor=west, font=\fontsize{7.4}{9}\selectfont] at (\L+0.98,-8.5)
+  \node[chipfill=good, text=ink] at (\L+1.45+2*1.68,-8.25) {$\neg\textcolor{mintdark}{\varphi}$:\,SAT\,\okc};
+  \node[anchor=west, font=\fontsize{8.6}{10}\selectfont] at (\L+0.68,-8.85)
        {$\textcolor{skydark}{r(\textcolor{mintdark}{\varphi})}=\mathbf{1}[\textcolor{mintdark}{\varphi}\text{ valid}]\cdot\big(\alpha+(1-\alpha)\,\tfrac{\#\,\text{passed}}{\#\,\text{tests}}\big)$};
 
   % ================================================================ Stage III
   \def\L{\Lc}
-  \node[block, fill=mint] (form) at (\L+0.3,-0.35) {\hspace*{0.75cm}AutoFormalizer};
-  \node at ($(form.west)+(0.5,0)$) {\ico{\faServer}};
-  \node[inset, minimum height=2.2cm] (f1) at (\L+0.85,-1.7) {};
-  \node[itext] at (\L+1.0,-1.85) {{\bfseries Equivalence check}};
-  \draw[tie] (\L+0.62,-1.3) |- (f1.west);
-  \node[color=mintdark] (fa) at (\L+1.75,-2.85) {\fontsize{11}{11}\selectfont\faFileCode[regular]};
-  \node[color=ink] (fb) at (\L+3.85,-2.85) {\fontsize{11}{11}\selectfont\faFileCode[regular]};
-  \draw[<->, line width=0.7pt, color=skydark] ($(fa.east)+(0.05,0)$) -- node[above=0pt, font=\fontsize{7.3}{8}\selectfont\bfseries] {$\varphi\equiv\varphi'$\,?} ($(fb.west)+(-0.05,0)$);
-  \node[chipfill=good, anchor=west] at (\L+0.95,-3.55) {$\equiv$: deploy};
-  \node[chipfill=bad, anchor=east] at (\L+\P-0.42,-3.55) {$\not\equiv$: analyst};
-  \node[block, fill=sky] (run) at (\L+0.3,-4.7) {\hspace*{0.6cm}Compliance test};
-  \node at ($(run.west)+(0.5,0)$) {\ico{\faCalendarCheck[regular]}};
-  \draw[flow] (\L+0.4,-1.3) -- (\L+0.4,-4.7);
-  \node[lab, anchor=west] at (\L+0.55,-4.32) {verified formulas};
-  \node[inset, minimum height=2.75cm] (f2) at (\L+0.85,-6.05) {};
-  \node[itext] at (\L+1.0,-6.2) {{\bfseries\boldmath $\varphi$ on certificate figures $v$}};
-  \draw[tie] (\L+0.62,-5.65) |- (f2.west);
-  \node[chipfill=good, anchor=west, inner xsep=2.2pt, font=\fontsize{6.8}{8}\selectfont] (s1) at (\L+0.95,-6.92) {comply};
-  \node[chipfill=bad, anchor=west, inner xsep=2.2pt, font=\fontsize{6.8}{8}\selectfont] (s2) at ($(s1.east)+(0.07,0)$) {breach};
-  \node[chipfill=amber, anchor=west, inner xsep=2.2pt, font=\fontsize{6.8}{8}\selectfont] at ($(s2.east)+(0.07,0)$) {undetermined};
-  \node[anchor=west, font=\fontsize{6.8}{9}\selectfont] at (\L+0.95,-7.5)
-       {{\bfseries headroom}: cushion $\boldsymbol{c}$, capacity $\boldsymbol{k}$};
-  \node[anchor=west, font=\fontsize{6.8}{9}\selectfont] at (\L+0.95,-7.98)
-       {{\bfseries LLM answers}: checked against $\varphi$};
+  \node[block, fill=mint] (form) at (\L+0.2,-0.3) {\hspace*{0.6cm}AutoFormalizer};
+  \node at ($(form.west)+(0.45,0)$) {\ico{\faServer}};
+  \node[inset, minimum height=2.3cm] (f1) at (\L+0.6,-1.55) {};
+  \node[itext] at (\L+0.72,-1.7) {{\bfseries Equivalence check}};
+  \draw[tie] (\L+0.42,-1.2) |- (f1.west);
+  \node[color=mintdark] (fa) at (\L+1.25,-2.7) {\fontsize{12}{12}\selectfont\faFileCode[regular]};
+  \node[color=ink] (fb) at (\L+3.5,-2.7) {\fontsize{12}{12}\selectfont\faFileCode[regular]};
+  \draw[<->, line width=0.7pt, color=skydark] ($(fa.east)+(0.05,0)$) -- node[above=0pt, font=\fontsize{8.6}{9}\selectfont\bfseries] {$\varphi\equiv\varphi'$\,?} ($(fb.west)+(-0.05,0)$);
+  \node[chipfill=good, anchor=west] at (\L+0.72,-3.4) {$\equiv$: deploy};
+  \node[chipfill=bad, anchor=east] at (\L+\P-0.3,-3.4) {$\not\equiv$: analyst};
+  \node[block, fill=sky] (run) at (\L+0.2,-4.6) {\hspace*{0.6cm}Compliance test};
+  \node at ($(run.west)+(0.45,0)$) {\ico{\faCalendarCheck[regular]}};
+  \draw[flow] (\L+0.3,-1.2) -- (\L+0.3,-4.6);
+  \node[lab, anchor=west] at (\L+0.45,-4.2) {verified formulas};
+  \node[inset, minimum height=3.4cm] (f2) at (\L+0.6,-5.9) {};
+  \node[itext] at (\L+0.72,-6.05) {{\bfseries\boldmath $\varphi$ on certificate $v$}};
+  \draw[tie] (\L+0.42,-5.5) |- (f2.west);
+  \node[chipfill=good, anchor=west] (s1) at (\L+0.72,-6.9) {comply};
+  \node[chipfill=bad, anchor=west] (s2) at ($(s1.east)+(0.1,0)$) {breach};
+  \node[chipfill=amber, anchor=west] at (\L+0.72,-7.42) {undetermined};
+  \node[anchor=north west, inner sep=0pt, align=left, font=\fontsize{8.6}{11}\selectfont] at (\L+0.72,-7.95)
+       {{\bfseries cushion} $\boldsymbol{c}$, {\bfseries capacity} $\boldsymbol{k}$\\
+        {\bfseries verify} LLM answers};
 
   % ================================================================ between stages
-  \draw[flow] (sft.east) -- ++(0.55,0) |- node[lab, pos=0.25, right=1pt, align=left] {init\\$\pi_{\mathrm{SFT}}$} (grpo.west);
+  \draw[flow] (sft.east) -| (\P+0.22,-1.0) |- (grpo.west);
+  \node[lab, rotate=90, font=\fontsize{8.6}{10}\selectfont] at (\P+0.5,-2.9) {init $\pi_{\mathrm{SFT}}$};
   \draw[flow] (grpo.east) -- (form.west);
 
   \begin{pgfonlayer}{page}   % opaque white page under everything (also for the SVG)
-    \fill[white] ([shift={(-6pt,-6pt)}]current bounding box.south west) rectangle ([shift={(6pt,6pt)}]current bounding box.north east);
+    \fill[white] ([shift={(-1pt,-1pt)}]current bounding box.south west) rectangle ([shift={(1pt,1pt)}]current bounding box.north east);
   \end{pgfonlayer}
 \end{tikzpicture}
 \end{document}
@@ -1512,7 +1539,7 @@ def table_families():
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{3.5pt}',
            r'\caption{The same recipe on three model families (per-clause score). FormaFin: mean $\pm$ s.d. over three '
            r'seeds; proven: formulas Z3 proves equivalent to the reference reading (of 143). $\Delta_{27B}$: FormaFin minus '
-           r'the Qwen3.8-27B reader (88.8), paired sign-flip test over clauses.}',
+           r'the Qwen3.8-27B reader (88.8), paired sign-flip test over clauses. Differences are computed before rounding.}',
            r'\label{tab:families}', r'\begin{tabular}{@{}lccccc@{}}', r'\toprule',
            r'\textbf{Base model} & \textbf{Reads} & \textbf{SFT} & \textbf{FormaFin} & \textbf{Proven} & '
            r'$\boldsymbol{\Delta_{27B}}$ \\', r'\midrule']
@@ -1583,7 +1610,9 @@ def table_llm_verification():
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{3pt}',
            r'\caption{FormaFin as a verifier of LLM analyses (2,527 questions). An LLM answer is accepted if it matches '
            r'the answer of the FormaFin formula (benchmark tolerance) and flagged otherwise. Caught: share of wrong LLM '
-           r'answers flagged; false flags: share of correct answers flagged; accepted: accuracy of accepted answers. '
+           r'answers flagged; false flags: share of correct answers flagged; accepted: accuracy of accepted answers. Acc.: '
+           r'share of the 2,527 questions answered correctly, pooled over questions, so it differs from the per-covenant '
+           r'score of \cref{tab:main}. '
            r'All: mean over three FormaFin seeds (s.d. over seeds $\le$ 0.8 points for caught, $\le$ 3.3 for false flags). Agreed: only clauses on which seeds 42 and 43 '
            r'provably agree, which run without review. $^\dagger$Proprietary; also reference reader A, so its accuracy '
            r'is biased upward.}',
