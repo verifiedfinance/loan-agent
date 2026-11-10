@@ -26,8 +26,8 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
 | Llama-3.3-70B (4-bit), reads directly | 70B | 79.1 | 67.2 |
 | FormaFin, SFT only (Qwen2.5-Coder-7B) | 7B | 85.8 | 78.3 |
 | **FormaFin, Qwen2.5-Coder-7B (3 seeds)** | **7B** | **94.8 ± 1.0** | **93.5 ± 3.6** |
-| **FormaFin, Llama-3.1-8B (3 seeds)** | **8B** | **96.8 ± 1.1** | **93.3** |
-| **FormaFin, Mistral-7B (3 seeds)** | **7B** | **92.6 ± 1.3** | **88.0** |
+| **FormaFin, Llama-3.1-8B (3 seeds)** | **8B** | **96.8 ± 1.1** | **93.3 ± 3.7** |
+| **FormaFin, Mistral-7B (3 seeds)** | **7B** | **92.6 ± 1.3** | **88.0 ± 1.1** |
 
 - **Small beats large.** Every 7-8B FormaFin model scores above every reader up to 70B; the 7B model is 6.1 points above
   the best reader (Holm-corrected p = 0.004) and 15.7 above the 70B reader.
@@ -42,9 +42,6 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
 - **The reward must constrain every input.** Without the interface gate, or with tests at a single test date, the
   policy learns to exploit the gap; the final reward tests every limit in every date window, condition and several
   test dates.
-
-All tables and figures, with confidence intervals and tests, are produced by
-[`src/headroom/paper.py`](src/headroom/paper.py) (notebook: [`notebooks/headroom_paper.ipynb`](notebooks/headroom_paper.ipynb)).
 
 ## Repository layout
 
