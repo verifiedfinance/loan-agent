@@ -1033,14 +1033,14 @@ TIKZ_OVERVIEW = r"""
   \def\P{5.6}     % width of panel (a)
   \def\G{1.35}    % gap between columns
   \def\W{11.0}    % width of panels (b)-(d)
-  \def\Bt{-3.55}  % top of panel (c)
-  \def\Ct{-7.1}   % top of panel (d)
-  \def\B{-11.75}  % bottom of all panels
+  \def\Bt{-3.15}  % top of panel (b)
+  \def\Ct{-6.3}   % top of panel (c)
+  \def\B{-10.55}  % bottom of all panels
   \pgfmathsetmacro\R{\P+\G}
   \begin{scope}[on background layer]
     \draw[panelbox] (0,0) rectangle (\P,\B);
-    \draw[panelbox, draw=oiorange, fill=oiorange!9] (\R,0) rectangle (\R+\W,-2.75);
-    \draw[panelbox, draw=oipurple, fill=oipurple!10] (\R,\Bt) rectangle (\R+\W,\Bt-2.75);
+    \draw[panelbox, draw=oiorange, fill=oiorange!9] (\R,0) rectangle (\R+\W,-2.3);
+    \draw[panelbox, draw=oipurple, fill=oipurple!10] (\R,\Bt) rectangle (\R+\W,\Bt-2.3);
     \draw[panelbox, draw=oiblue, fill=oiblue!7] (\R,\Ct) rectangle (\R+\W,\B);
   \end{scope}
   \node[head] at ({\P/2}, 0.1) {THE QUARTERLY CHECK};
@@ -1051,9 +1051,9 @@ TIKZ_OVERVIEW = r"""
   % ================================================================ (a) clause, certificate, questions
   \node[block, fill=white] (cl) at (0.3,-0.35) {\hspace*{0.75cm}Covenant clause};
   \node at ($(cl.west)+(0.5,0)$) {\ico{\faFileContract}};
-  \node[inset, minimum width=4.45cm, minimum height=3.55cm] (c1) at (0.85,-1.6) {};
+  \node[inset, minimum width=4.45cm, minimum height=2.45cm] (c1) at (0.85,-1.45) {};
   \draw[tie] (0.62,-1.3) |- (c1.west);
-  \node[listing, text width=3.95cm] at (0.97,-1.72) {%
+  \node[listing, text width=3.95cm] at (0.97,-1.57) {%
     \fontsize{7.0}{9.0}\selectfont\itshape
     \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
     \lno{1} & <<COMPANY>> (<<YEAR>>), \S\,7.9\\
@@ -1061,17 +1061,14 @@ TIKZ_OVERVIEW = r"""
     \lno{3} & \ \ Ratio of not more than 2.5 to 1.0.\\
     \lno{4} & (b) a Total Debt to EBITDA\\
     \lno{5} & \ \ Ratio of not more than 3.0 to 1.0.\\
-    \lno{6} & (c) a Fixed Charge Coverage Ratio\\
-    \lno{7} & \ \ of not less than 1.0 to 1.0.\\
-    \lno{8} & (d) a Fixed Charge Ratio of not\\
-    \lno{9} & \ \ less than 1.25 to 1.0.
+    \lno{6} & (c), (d) two fixed-charge ratios \ldots
     \end{tabular}};
 
-  \node[block, fill=white] (ce) at (0.3,-5.65) {\hspace*{0.75cm}Compliance certificate};
+  \node[block, fill=white] (ce) at (0.3,-4.35) {\hspace*{0.75cm}Compliance certificate};
   \node at ($(ce.west)+(0.5,0)$) {\ico{\faFileInvoiceDollar}};
-  \node[inset, minimum width=4.45cm, minimum height=2.3cm] (c2) at (0.85,-6.9) {};
-  \draw[tie] (0.62,-6.6) |- (c2.west);
-  \node[listing, text width=3.95cm] at (0.97,-7.02) {%
+  \node[inset, minimum width=4.45cm, minimum height=2.15cm] (c2) at (0.85,-5.45) {};
+  \draw[tie] (0.62,-5.3) |- (c2.west);
+  \node[listing, text width=3.95cm] at (0.97,-5.52) {%
     \fontsize{7.4}{9.2}\selectfont
     \begin{tabular}{@{}r@{\hspace{5pt}}l@{\hspace{8pt}}r@{}}
     \lno{1} & Test date & <<DATE>>\\
@@ -1081,21 +1078,21 @@ TIKZ_OVERVIEW = r"""
     \lno{5} & \multicolumn{2}{l}{+ two fixed-charge items}
     \end{tabular}};
 
-  \node[block, fill=white] (qs) at (0.3,-9.6) {\hspace*{0.75cm}Three questions};
+  \node[block, fill=white] (qs) at (0.3,-8.15) {\hspace*{0.75cm}Three questions};
   \node at ($(qs.west)+(0.5,0)$) {\ico{\faQuestionCircle}};
-  \node[inset, minimum width=4.45cm, minimum height=0.75cm] (c3) at (0.85,-10.85) {};
-  \draw[tie] (0.62,-10.55) |- (c3.west);
+  \node[inset, minimum width=4.45cm, minimum height=0.75cm] (c3) at (0.85,-9.25) {};
+  \draw[tie] (0.62,-9.1) |- (c3.west);
   % three equal-width tags spread evenly across the card (inner span 1.05--5.1)
   \foreach \q [count=\j] in {status, cushion, capacity}
-    \node[tag, minimum width=1.23cm, align=center] at ({1.05 + 0.615 + (\j-1)*1.41}, -11.225) {\q};
+    \node[tag, minimum width=1.23cm, align=center] at ({1.05 + 0.615 + (\j-1)*1.41}, -9.625) {\q};
 
   % ================================================================ (b) by hand
   \node[block, fill=white] (an) at (\R+0.3,-0.35) {\hspace*{0.75cm}Credit analyst};
   \node at ($(an.west)+(0.5,0)$) {\ico{\faUserTie}};
   \node[lab, anchor=west] at (\R+5.05,-0.83) {works through each covenant by hand,\\for every loan and every quarter};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.85cm] (h1) at (\R+0.85,-1.6) {};
+  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.8cm] (h1) at (\R+0.85,-1.35) {};
   \draw[tie] (\R+0.62,-1.3) |- (h1.west);
-  \node[mstep] (m1) at (\R+1.05,-2.025) {1\ \ read the clause};
+  \node[mstep] (m1) at (\R+1.05,-1.75) {1\ \ read the clause};
   \node[mstep] (m2) at ($(m1.east)+(0.45,0)$) {2\ \ compute each ratio};
   \node[mstep] (m3) at ($(m2.east)+(0.45,0)$) {3\ \ solve for cushion, capacity};
   \draw[flow] (m1.east) -- (m2.west);
@@ -1105,18 +1102,18 @@ TIKZ_OVERVIEW = r"""
   \node[block, fill=white] (rd) at (\R+0.3,\Bt-0.35) {\hspace*{0.75cm}7B model reads};
   \node at ($(rd.west)+(0.5,0)$) {\ico{\faRobot}};
   \node[lab, anchor=west] at (\R+5.05,\Bt-0.83) {reasons over clause and figures in text,\\again for every certificate};
-  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.85cm] (b1) at (\R+0.85,\Bt-1.6) {};
+  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.8cm] (b1) at (\R+0.85,\Bt-1.35) {};
   \draw[tie] (\R+0.62,\Bt-1.3) |- (b1.west);
-  \node[chipfill=good, anchor=west] (s1) at (\R+1.05,\Bt-2.025) {status: <<D7STATUS>>\ \ok};
+  \node[chipfill=good, anchor=west] (s1) at (\R+1.05,\Bt-1.75) {status: <<D7STATUS>>\ \ok};
   \node[chipfill=bad, anchor=west] (s2) at ($(s1.east)+(0.2,0)$) {cushion: <<D7CUSHION>>\ \no\ \ (true <<RCUSHION>>)};
   \node[chipfill=good, anchor=west] at ($(s2.east)+(0.2,0)$) {capacity: <<D7CAPACITY>>M USD\ \ok};
 
   % ================================================================ (d) formalize, then solve
   \node[block, fill=white] (af) at (\R+0.3,\Ct-0.35) {\hspace*{0.75cm}AutoFormalizer (7B)};
   \node at ($(af.west)+(0.5,0)$) {\ico{\faServer}};
-  \node[inset, minimum width=5.85cm, minimum height=2.75cm] (f1) at (\R+0.85,\Ct-1.6) {};
+  \node[inset, minimum width=5.85cm, minimum height=2.75cm] (f1) at (\R+0.85,\Ct-1.35) {};
   \draw[tie] (\R+0.62,\Ct-1.3) |- (f1.west);
-  \node[listing, text width=5.35cm] at (\R+0.97,\Ct-1.72) {%
+  \node[listing, text width=5.35cm] at (\R+0.97,\Ct-1.47) {%
     \fontsize{6.6}{8.6}\selectfont\ttfamily
     \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
     \lno{1} & (define-fun covenant\_holds\\
@@ -1131,13 +1128,13 @@ TIKZ_OVERVIEW = r"""
   \node[block, fill=sky, minimum width=3.75cm] (z3) at (\R+6.95,\Ct-0.35) {\hspace*{0.75cm}Z3 solver};
   \node at ($(z3.west)+(0.5,0)$) {\ico{\faCogs}};
   \draw[flow] (af.east) -- node[lab, above=1pt] {formula, once} (z3.west);
-  \node[inset, minimum width=3.2cm, minimum height=2.75cm] (z1) at (\R+7.5,\Ct-1.6) {};
+  \node[inset, minimum width=3.2cm, minimum height=2.75cm] (z1) at (\R+7.5,\Ct-1.35) {};
   \draw[tie] (\R+7.27,\Ct-1.3) |- (z1.west);
-  \node[anchor=north west, font=\fontsize{8}{10}\selectfont\bfseries, align=left] at (\R+7.65,\Ct-1.75)
+  \node[anchor=north west, font=\fontsize{8}{10}\selectfont\bfseries, align=left] at (\R+7.65,\Ct-1.5)
        {every quarter:};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.5) {status: <<OSTATUS>>\ \ok};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.15) {cushion: <<OCUSHION>>\ \ok};
-  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.8) {capacity: <<OCAPACITY>>M USD\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.25) {status: <<OSTATUS>>\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.9) {cushion: <<OCUSHION>>\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.55) {capacity: <<OCAPACITY>>M USD\ \ok};
 
   % ================================================================ inputs to (b), (c) and (d)
   \draw[flow] (\P,-0.825) -- node[lab, above=1pt, align=center] {clause\\+ figures} (an.west);
