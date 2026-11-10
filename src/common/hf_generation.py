@@ -13,14 +13,15 @@ sys.path[:0] = [str(SRC)] + [str(d) for d in sorted(SRC.iterdir()) if d.is_dir()
 from paths import ROOT  # noqa: E402
 
 NO_THINKING = {'Qwen/Qwen3.8-27B'}
-FOUR_BIT = {'meta-llama/Llama-3.3-70B-Instruct'}  # loaded as for its predictions (evaluate_sft_validity.py --load-in-4bit)
+FOUR_BIT = {'meta-llama/Llama-3.3-70B-Instruct'}  # 70B reader: bf16 needs ~140 GB > 96 GB GPU; bitsandbytes NF4 (~40 GB). FP8 needs Hub kernels; INT8 is ~11x slower
 
 
 def load(writer):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     path = ROOT / writer if (ROOT / writer).exists() else Path(writer)
-    tok = AutoTokenizer.from_pretrained(str(path), padding_side='left')
+    from lora_utils import load_tokenizer  # DeepSeek-Coder: tokenizer that round-trips spaces and newlines
+    tok = load_tokenizer(str(path), padding_side='left')
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
     dtype = torch.bfloat16
