@@ -67,7 +67,7 @@ DIRECT = [('qwen7b', 'Qwen2.5-Coder-7B', '7B', 'answers_long/direct_qwen7b.jsonl
           ('qwen27b', 'Qwen3.8-27B', '27B', 'answers_long/direct_qwen27b.jsonl')]
 FORMULA = [('prompted', 'Prompted, no training', 'answers/formula_qwen7b_prompted.jsonl'),
            ('sft', 'SFT (789 pairs)', 'answers/formula_sft789.jsonl'),
-           ('rl_v1', 'SFT + RL, v1 (no interface term)', 'answers/formula_rl789_s42.jsonl')]
+           ('rl_v1', 'SFT + RL, no validity gate', 'answers/formula_rl789_s42.jsonl')]
 RL_V2 = {42: 'answers/formula_rl789_v2.jsonl', 43: 'answers/formula_rl789_v2_s43.jsonl', 44: 'answers/formula_rl789_v2_s44.jsonl'}
 RL_V2_FORMULAS = {42: 'rl789_v2', 43: 'rl789_v2_s43', 44: 'rl789_v2_s44'}
 FORMULA_FILES = {'prompted': 'qwen7b_prompted', 'sft': 'sft789', 'rl_v1': 'rl789_s42'}
@@ -166,10 +166,10 @@ def system_stats():
     for key, label, rel in FORMULA:
         add(key, label, '7B formalizer', rel, True)
     for s, rel in RL_V2.items():
-        add(f'rl_v2_s{s}', f'SFT + RL v2 (seed {s})', '7B formalizer', rel, True)
+        add(f'rl_v2_s{s}', f'FormaFin (seed {s})', '7B formalizer', rel, True)
     seeds = [out[f'rl_v2_s{s}'] for s in RL_V2]
     pc = {c: sum(s['pc'][c] for s in seeds) / len(seeds) for c in seeds[0]['pc']}
-    out['rl_v2'] = dict(label='SFT + RL v2 (ours, 3 seeds)', group='7B formalizer', ours=True, pc=pc, score=mean(pc),
+    out['rl_v2'] = dict(label='FormaFin: SFT + RL (ours, 3 seeds)', group='7B formalizer', ours=True, pc=pc, score=mean(pc),
                         ci=boot_ci(list(pc.values())), seed_scores=[s['score'] for s in seeds],
                         **{q: float(np.mean([s[q] for s in seeds])) for q, _ in QUESTIONS},
                         **{f'{q}_sd': float(np.std([s[q] for s in seeds], ddof=1)) for q, _ in QUESTIONS},
@@ -287,7 +287,7 @@ def table_benchmark():
         ('Validation', 'Reference answers reproduced by the formula-arm Z3 code', f"{val['validation_correct']:,} / {val['cases']:,}"),
     ]
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{5pt}',
-           r'\caption{The headroom benchmark. Clauses come from agreements whose borrowers never appear in any training '
+           r'\caption{CovenantBench. Clauses come from agreements whose borrowers never appear in any training '
            r'data; each kept clause has a reference reading on which two independent readers (Claude and Qwen3.8-27B) '
            r'agree exactly. Certificates are constructed so that the binding limit sits at a chosen cushion.}',
            r'\label{tab:benchmark}', r'\begin{tabular}{@{}llr@{}}', r'\toprule', r' & \textbf{Item} & \textbf{Count} \\', r'\midrule']
@@ -335,11 +335,11 @@ def table_main():
             s = r'\textbf{' + s + '}'
         return s
     lat = [r'\begin{table*}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{6pt}',
-           r'\caption{Headroom questions on the borrower-disjoint benchmark (143 clauses, 1,064 cases). Score: mean '
+           r'\caption{Results on the three covenant questions (status, earnings cushion, debt capacity) on the borrower-disjoint benchmark (143 clauses, 1,064 cases). Score: mean '
            r'per-clause share of questions answered correctly, with a 95\% clause-bootstrap interval. Status: comply / '
            r'breach / undetermined; earnings cushion: within 0.5 percentage points; debt capacity: within 0.5\% of the '
            r'current debt. Verified: formulas proven equivalent to the reference reading by Z3 for all inputs. '
-           r'All models are open-weights and run in-house. \textbf{Bold}: best. RL v2: mean $\pm$ s.d. over three seeds; '
+           r'All models are open-weights and run in-house. \textbf{Bold}: best. FormaFin: mean $\pm$ s.d. over three seeds; '
            r'the other systems are single greedy runs. Direct readers were given 4,096 answer tokens.}',
            r'\label{tab:main}', r'\begin{tabular}{@{}lcccccc@{}}', r'\toprule',
            r'\textbf{System} & \textbf{Size} & \textbf{Score} & \textbf{Status} & '
@@ -375,19 +375,19 @@ def table_paired():
     ph = holm([r['p'] for r in res])
     seed_diffs = {k: [paired(S[f'rl_v2_s{s}']['pc'], S[k]['pc'])['diff'] for s in RL_V2] for k, _ in comps}
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{4pt}',
-           r'\caption{SFT + RL v2 (three-seed mean) minus each comparator: mean per-clause difference in points, 95\% '
+           r'\caption{FormaFin (three-seed mean) minus each comparator: mean per-clause difference in points, 95\% '
            r'clause-bootstrap interval, two-sided sign-flip test over the 143 clauses (10,000 permutations), Holm-corrected '
            r'over the four comparisons. Seeds: the difference for each of the three RL seeds. Lower block: a separate Holm '
            r'family of four comparisons.}',
            r'\label{tab:paired}', r'\begin{tabular}{@{}lrcrr@{}}', r'\toprule',
-           r'\textbf{RL v2 minus} & \textbf{$\Delta$} & \textbf{95\% CI} & \textbf{$p_{\mathrm{Holm}}$} & \textbf{Seeds} \\', r'\midrule']
-    md = ['| RL v2 minus | Δ (points) | 95% CI | p (Holm) | Per seed |', '|---|---|---|---|---|']
+           r'\textbf{FormaFin minus} & \textbf{$\Delta$} & \textbf{95\% CI} & \textbf{$p_{\mathrm{Holm}}$} & \textbf{Seeds} \\', r'\midrule']
+    md = ['| FormaFin minus | Δ (points) | 95% CI | p (Holm) | Per seed |', '|---|---|---|---|---|']
     for (k, lab), r, p in zip(comps, res, ph):
         sd = '/'.join(f'{100 * x:+.1f}' for x in seed_diffs[k])
         lat.append(f"{tex(lab)} & {100 * r['diff']:+.1f} & [{100 * r['lo']:+.1f}, {100 * r['hi']:+.1f}] & {fmt_p(p)} & "
                    r'{\scriptsize ' + sd + r'} \\')
         md.append(f"| {lab} | {100 * r['diff']:+.1f} | [{100 * r['lo']:+.1f}, {100 * r['hi']:+.1f}] | {p:.4f} | {sd} |")
-    stages = [('sft', 'prompted', 'SFT minus prompted formalizer'), ('rl_v1', 'sft', 'RL v1 minus SFT'),
+    stages = [('sft', 'prompted', 'SFT minus prompted formalizer'), ('rl_v1', 'sft', 'RL without gate minus SFT'),
               ('sft', 'qwen7b', 'SFT formalizer minus 7B reading'), ('prompted', 'qwen7b', 'Prompted formalizer minus 7B reading')]
     res2 = [paired(S[a]['pc'], S[b]['pc']) for a, b, _ in stages]
     ph2 = holm([r['p'] for r in res2])
@@ -403,8 +403,8 @@ def table_paired():
 def table_verification():
     S = system_stats()
     ver = verification()
-    rows = [('prompted', 'Prompted, no training'), ('sft', 'SFT (789 pairs)'), ('rl_v1', 'SFT + RL v1')] + \
-           [(f'rl_v2_s{s}', f'SFT + RL v2, seed {s}') for s in RL_V2]
+    rows = [('prompted', 'Prompted, no training'), ('sft', 'SFT (789 pairs)'), ('rl_v1', 'SFT + RL, no gate')] + \
+           [(f'rl_v2_s{s}', f'FormaFin, seed {s}') for s in RL_V2]
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{4pt}',
            r'\caption{Formal verification of the generated formulas (143 clauses). Equivalent: Z3 proves the formula '
            r'equal to the reference reading for every input (line items $>0$, positive ratio denominators, any test '
@@ -429,8 +429,8 @@ def table_verification():
     return write('tab4_verification', '\n'.join(lat), '\n'.join(md))
 
 
-CROSS = [('rl789_v2', 'rl789_v2_s43', 'answers/formula_rl789_v2.jsonl', 'v2s42_v2s43', 'RL v2 seed 42 $\\times$ seed 43', 'RL v2 seed 42 × seed 43'),
-         ('rl789_v2', 'sft789', 'answers/formula_rl789_v2.jsonl', 'v2s42_sft', 'RL v2 seed 42 $\\times$ SFT', 'RL v2 seed 42 × SFT'),
+CROSS = [('rl789_v2', 'rl789_v2_s43', 'answers/formula_rl789_v2.jsonl', 'v2s42_v2s43', 'FormaFin seed 42 $\\times$ seed 43', 'FormaFin seed 42 × seed 43'),
+         ('rl789_v2', 'sft789', 'answers/formula_rl789_v2.jsonl', 'v2s42_sft', 'FormaFin seed 42 $\\times$ SFT', 'FormaFin seed 42 × SFT'),
          ('sft789', 'qwen7b_prompted', 'answers/formula_sft789.jsonl', 'sft_prompted', 'SFT $\\times$ prompted 7B', 'SFT × prompted 7B')]
 
 
@@ -469,7 +469,7 @@ def table_sensitivity():
         len_m = marks(rel.replace('answers/', 'answers_lenient/'))
         rows.append(('Formula interface (formalizers)', f'{lab}: strict $\\rightarrow$ typed subset of parameters',
                      f'{lab}: strict → typed subset', pct(S[k]['score']), pct(mean(per_clause(len_m))), '', ''))
-    for k, lab in (('sft', 'SFT'), ('rl_v2', 'SFT + RL v2 (3 seeds)')):
+    for k, lab in (('sft', 'SFT'), ('rl_v2', 'FormaFin (3 seeds)')):
         runs = [S[f'rl_v2_s{s}']['pc'] for s in RL_V2] if k == 'rl_v2' else [S[k]['pc']]
         a = [np.mean([pc[c] for c in pc if c not in sched]) for pc in runs]
         b = [np.mean([pc[c] for c in pc if c in sched]) for pc in runs]
@@ -481,7 +481,7 @@ def table_sensitivity():
     lat = [r'\begin{table}[t]', r'\centering', r'\small', r'\setlength{\tabcolsep}{4pt}',
            r'\caption{Sensitivity analyses (per-clause score). Direct readers were first run with a 1,024-token answer '
            r'limit; long-reasoning models were cut off, so the main table uses 4,096. The strict interface rule (the '
-           r'pre-registered one) is used throughout the paper; the lenient rule only diagnoses RL v1. RL v2 was trained '
+           r'pre-registered one) is used throughout the paper; the lenient rule only diagnoses the run without the gate. FormaFin was trained '
            r'only on clauses without date schedules or conditions; its rows are mean $\pm$ s.d. over three seeds.}',
            r'\label{tab:sensitivity}', r'\begin{tabular}{@{}llrrl@{}}', r'\toprule',
            r'\textbf{Analysis} & \textbf{Setting: A $\rightarrow$ B} & \textbf{A} & \textbf{B} & \textbf{Note} \\', r'\midrule']
@@ -510,7 +510,7 @@ def fig_main():
     keys = ['qwen7b', 'qwen32b', 'qwen27b', 'sft', 'rl_v2']
     labels = {'qwen7b': 'Qwen2.5-Coder-7B, reads directly', 'qwen32b': 'Qwen2.5-Coder-32B, reads directly',
               'qwen27b': 'Qwen3.8-27B, reads directly',
-              'sft': 'Ours: 7B SFT formalizer + Z3', 'rl_v2': 'Ours: 7B SFT + RL formalizer + Z3 (3 seeds)'}
+              'sft': 'Ours: 7B SFT formalizer + Z3', 'rl_v2': 'Ours: FormaFin 7B formalizer + Z3 (3 seeds)'}
     metrics = [('score', 'Overall (per clause)'), ('status', 'Status'), ('cushion', 'Earnings cushion'), ('capacity', 'Debt capacity')]
     fig, axes = plt.subplots(1, 5, figsize=(26, 6.2), gridspec_kw=dict(width_ratios=[1, 1, 1, 1, 0.95]))
     for ax, (m, title) in zip(axes, metrics):
@@ -552,7 +552,7 @@ def fig_size():
         ax.vlines(xs[k], 100 * lo, 100 * hi, color=PALETTE['red_strong'], linewidth=2, alpha=0.6, zorder=2)
         ax.annotate(S[k]['label'], (xs[k], 100 * S[k]['score']), xytext=(10, -22 if k != 'qwen27b' else 14),
                     textcoords='offset points', fontsize=13)
-    for k, mk, off, lab, xo in (('sft', 's', (14, -6), 'Ours: SFT', 6.2), ('rl_v2', '*', (16, -6), 'Ours: SFT + RL (3 seeds)', 7.8)):
+    for k, mk, off, lab, xo in (('sft', 's', (14, -6), 'Ours: SFT', 6.2), ('rl_v2', '*', (16, -6), 'Ours: FormaFin (3 seeds)', 7.8)):
         lo, hi = S[k]['ci']
         ax.vlines(xo, 100 * lo, 100 * hi, color=COLORS[k], linewidth=3, zorder=4)
         ax.plot(xo, 100 * S[k]['score'], marker=mk, markersize=20 if mk == '*' else 13, color=COLORS[k],
@@ -625,7 +625,7 @@ def fig_verification():
     """Fig. 4: (a) formal verification of each formalizer's formulas; (b) label-free self-check: coverage and score."""
     ver = verification()
     S = system_stats()
-    rows = [('prompted', 'Prompted 7B'), ('sft', 'SFT'), ('rl_v1', 'SFT + RL v1')] + [(f'rl_v2_s{s}', f'SFT + RL v2 ({s})') for s in RL_V2]
+    rows = [('prompted', 'Prompted 7B'), ('sft', 'SFT'), ('rl_v1', 'RL, no gate')] + [(f'rl_v2_s{s}', f'FormaFin ({s})') for s in RL_V2]
     fig, axes = plt.subplots(1, 3, figsize=(24, 6.4), gridspec_kw=dict(width_ratios=[1.35, 1, 0.55]))
     ax = axes[0]
     y = np.arange(len(rows))[::-1]
@@ -684,7 +684,7 @@ def fig_cases():
               ('With schedule /\ncondition', lambda c: c['clause_id'] in sched)]
     keys = [('qwen7b', 'answers_long/direct_qwen7b.jsonl'), ('qwen27b', 'answers_long/direct_qwen27b.jsonl'),
             ('sft', 'answers/formula_sft789.jsonl'), ('rl_v2', None)]
-    labels = {'qwen7b': 'Qwen2.5-Coder-7B, reads directly', 'qwen27b': 'Qwen3.8-27B, reads directly', 'sft': 'Ours: SFT', 'rl_v2': 'Ours: SFT + RL (3 seeds)'}
+    labels = {'qwen7b': 'Qwen2.5-Coder-7B, reads directly', 'qwen27b': 'Qwen3.8-27B, reads directly', 'sft': 'Ours: SFT', 'rl_v2': 'Ours: FormaFin (3 seeds)'}
 
     def acc(rel, keep):
         if rel is None:
@@ -720,144 +720,151 @@ def fig_cases():
 EXAMPLE = ('fin_320522', '-1%')  # LINC Logistics (2011): four covenants; the case placed at an earnings cushion of -1%
 
 
-TIKZ_OVERVIEW = r"""% Fig. 0 (overview): the analyst's question, reading directly vs. formalize-then-solve, and headroom accuracy.
-% Generated by src/headroom/paper.py (fig_overview_tex); every number comes from the result files.
-% Compile standalone (pdflatex) or \input{} the tikzpicture into the paper (needs the packages and colours below).
-\documentclass[tikz,border=4pt]{standalone}
-\usepackage[T1]{fontenc}
-\usepackage[scaled=0.92]{helvet}
-\renewcommand{\familydefault}{\sfdefault}
-\usepackage{pifont}
-\usepackage{pgfplots}
-\usepackage[eulergreek]{sansmath}
-\renewcommand{\ttdefault}{lmtt}
-\pgfplotsset{compat=1.17}
-\usetikzlibrary{arrows.meta,backgrounds,fit,patterns,positioning}
-\definecolor{bluemain}{HTML}{0F4D92}
-\definecolor{bluebg}{HTML}{E8EFF8}
-\definecolor{redone}{HTML}{F6CFCB}
-\definecolor{redtwo}{HTML}{E9A6A1}
-\definecolor{redstrong}{HTML}{B64342}
-\definecolor{neutral}{HTML}{CFCECE}
-\definecolor{graydark}{HTML}{4D4D4D}
-\definecolor{graymid}{HTML}{767676}
-\definecolor{ink}{HTML}{272727}
-\definecolor{paperbg}{HTML}{F7F7F5}
+TIKZ_OVERVIEW = r"""
 \begin{document}
-\sansmath\hyphenpenalty=10000\exhyphenpenalty=10000
 \begin{tikzpicture}[
-    font=\small, >={Stealth[length=2.6mm,width=2mm]},
-    box/.style={draw=ink, rounded corners=3pt, line width=0.8pt, inner sep=6pt, align=left, anchor=north west},
-    head/.style={font=\bfseries\large, anchor=west, inner sep=0pt},
-    sub/.style={font=\bfseries},
-    note/.style={color=graydark},
-    flow/.style={->, line width=1.1pt, color=graymid},
+    font=\fontsize{8}{10}\selectfont, >={Stealth[length=2.2mm,width=1.7mm]},
+    panelbox/.style={draw=teal, dash pattern=on 2.4pt off 1.8pt, line width=0.9pt, rounded corners=7pt, fill=panel},
+    head/.style={font=\fontsize{11}{13}\selectfont\lsstyle, color=ink, anchor=south},
+    block/.style={draw=ink, line width=0.8pt, rounded corners=6pt, minimum width=4.4cm, minimum height=0.95cm,
+                  anchor=north west, font=\fontsize{11.5}{13}\selectfont\bfseries},
+    inset/.style={draw=ink, line width=0.6pt, rounded corners=5pt, fill=white, anchor=north west, inner sep=0pt},
+    listing/.style={fill=ink!4, rounded corners=2pt, inner xsep=5pt, inner ysep=4pt, anchor=north west,
+                    path picture={\fill[teal] (path picture bounding box.north west) rectangle
+                                  ([xshift=1.4pt]path picture bounding box.south west);}},
+    chipfill/.style={draw=#1, fill=#1!12, text=ink, rounded corners=1.8pt, line width=0.6pt, inner xsep=4pt, inner ysep=1.8pt,
+                 font=\fontsize{7.6}{9}\selectfont},
+    tag/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=3pt,
+                inner ysep=1.3pt, text height=1.6ex, text depth=0.25ex, font=\fontsize{7}{8}\selectfont},
+    mstep/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=4pt,
+                 inner ysep=2pt, font=\fontsize{7.6}{9}\selectfont, anchor=west},
+    lab/.style={font=\fontsize{8}{9.5}\selectfont, color=black, align=left},
+    flow/.style={->, line width=0.7pt, color=ink, rounded corners=4pt},
+    tie/.style={line width=0.6pt, color=ink, rounded corners=4pt},
   ]
-  % ---------------------------------------------------------------- (a) the analyst's quarterly question
-  \node[head] at (0, 0) {(a) The analyst's quarterly question};
-  \node[box, fill=paperbg, text width=6.1cm] (clause) at (0, -0.45) {
-    {\color{graydark}Credit agreement: <<COMPANY>> (<<YEAR>>)}\\[4pt]
-    \textit{7.9 Financial Covenants. (a) Maintain at all times a Senior Debt to EBITDA Ratio of not more than
-    2.5 to 1.0. (b) \ldots{} a Total Debt to EBITDA Ratio of not more than 3.0 to 1.0. (c), (d) Fixed Charge
-    ratios \ldots}\\[8pt]
-    {\color{graydark}Compliance certificate, <<DATE>>}\\[2pt]
-    \begin{tabular}{@{}l@{\hspace{2em}}r@{}}
-      EBITDA & \$<<EBITDA>>M\\
-      Senior Debt & \$<<SENIOR>>M\\
-      Total Debt & \$<<TOTAL>>M\\
-    \end{tabular}\\
-    {\footnotesize\color{graydark}(+ two fixed-charge items)}
-  };
-  \node[box, fill=white, text width=6.1cm, below=0.35cm of clause.south west, anchor=north west] (questions) {
-    {\bfseries 1.\ Status}\\ {\color{graydark}comply, breach or undetermined?}\\[4pt]
-    {\bfseries 2.\ Earnings cushion}\\ {\color{graydark}how far can EBITDA fall before a breach?}\\[4pt]
-    {\bfseries 3.\ Debt capacity}\\ {\color{graydark}how much more debt is allowed?}\\[7pt]
-    {\itshape\color{bluemain}Confidential figures, every quarter, every loan:\\ in-house and auditable.}
-  };
-
-  % ---------------------------------------------------------------- (b) two ways to answer
-  \node[head] at (7.2, 0) {(b) Two ways to answer};
-  \node[box, fill=redone, text width=5.4cm] (direct) at (7.2, -0.45) {
-    {\bfseries\normalsize Read the clause directly}\\[4pt]
-    An LLM reads clause and certificate and answers in text (Qwen2.5-Coder-7B):\\[6pt]
-    {\ttfamily\bfseries\color{redstrong} status <<D7STATUS>>\quad cushion <<D7CUSHION>>}\\[4pt]
-    {\itshape\color{graydark}multi-step arithmetic in free text}
-  };
-  % formalize, then solve (ours): three stacked steps on a blue panel
-  \node[box, fill=white, draw=bluemain, text width=5.1cm, below=1.05cm of direct.south west, xshift=0.15cm,
-        anchor=north west] (formalizer) {
-    {\bfseries Open 7B formalizer (in-house)}\\[2pt]
-    {\footnotesize\color{graydark} SFT on 789 teacher pairs, then RL on unlabeled clauses with a solver-checked reward}
-  };
-  \node[box, fill=paperbg, draw=graymid, text width=5.1cm, below=0.45cm of formalizer.south west, anchor=north west]
-        (formula) {
-    {\ttfamily\scriptsize
-     (define-fun covenant\_holds\\
-     \hspace*{0.6em}((ebitda Real) (senior\_debt Real)\\
-     \hspace*{0.9em}(total\_debt Real) \ldots) Bool\\
-     \hspace*{0.6em}(and (<= (/ senior\_debt ebitda) 2.5)\\
-     \hspace*{2.6em}(<= (/ total\_debt ebitda) 3.0)\\
-     \hspace*{2.6em}\ldots))}
-  };
-  \node[inner sep=0pt, align=left, below=0.5cm of formula.south west, anchor=north west, xshift=6pt] (result) {
-    {\bfseries Z3 + certificate facts:}\\[4pt]
-    {\ttfamily\bfseries\color{bluemain} status <<OSTATUS>>\quad cushion <<OCUSHION>>}\\[3pt]
-    {\ttfamily\color{bluemain} capacity <<OCAPACITY>>M USD}
-  };
-  \node[anchor=north east, color=bluemain, font=\LARGE, inner sep=0pt] (tick) at ([xshift=-4pt]formula.east |- result.north) {\ding{51}};
-  \draw[->, line width=1.1pt, color=bluemain] (formalizer.south) -- (formula.north);
-  \draw[->, line width=1.1pt, color=bluemain] (formula.south) -- (formula.south |- result.north);
+  % One palette hue per approach, light tint as background, full hue as border:
+  % (a) Paul Tol purple, (b) Paul Tol sand, (c) Okabe-Ito blue (all colorblind-safe)
+  \definecolor{oiorange}{HTML}{AA4499}  % (a) by hand
+  \definecolor{oipurple}{HTML}{DDCC77}  % (b) reading directly
+  \definecolor{oiblue}{HTML}{0072B2}    % (c) formalize, then solve
+  \newcommand{\lno}[1]{{\color{teal}\fontsize{6.4}{7}\selectfont\ttfamily #1}}
+  \def\P{5.6}     % width of panel (a)
+  \def\G{1.35}    % gap between columns
+  \def\W{11.0}    % width of panels (b)-(d)
+  \def\Bt{-3.55}  % top of panel (c)
+  \def\Ct{-7.1}   % top of panel (d)
+  \def\B{-11.75}  % bottom of all panels
+  \pgfmathsetmacro\R{\P+\G}
   \begin{scope}[on background layer]
-    \node[draw=bluemain, line width=1.3pt, rounded corners=3pt, fill=bluebg, inner xsep=0.15cm, inner ysep=0.2cm,
-          fit={(formalizer) (formula) (result) ([yshift=0.7cm]formalizer.north)}] (ours) {};
+    \draw[panelbox] (0,0) rectangle (\P,\B);
+    \draw[panelbox, draw=oiorange, fill=oiorange!9] (\R,0) rectangle (\R+\W,-2.75);
+    \draw[panelbox, draw=oipurple, fill=oipurple!10] (\R,\Bt) rectangle (\R+\W,\Bt-2.75);
+    \draw[panelbox, draw=oiblue, fill=oiblue!7] (\R,\Ct) rectangle (\R+\W,\B);
   \end{scope}
-  \node[anchor=north west, font=\bfseries\normalsize, color=bluemain] at ([xshift=0.15cm, yshift=-0.12cm]ours.north west)
-       {Formalize, then solve (ours)};
+  \node[head] at ({\P/2}, 0.1) {THE QUARTERLY CHECK};
+  \node[head] at ({\R+\W/2}, 0.1) {(a) BY HAND};
+  \node[head] at ({\R+\W/2}, \Bt+0.1) {(b) READING DIRECTLY};
+  \node[head] at ({\R+\W/2}, \Ct+0.1) {(c) FORMALIZE, THEN SOLVE};
 
-  % ---------------------------------------------------------------- verdicts
-  \node[box, fill=white, draw=graymid, text width=5.3cm] (reference) at (13.9, -0.45) {
-    {\bfseries\normalsize Reference answer}\\[4pt]
-    {\ttfamily status <<RSTATUS>>\quad cushion <<RCUSHION>>\\ capacity <<RCAPACITY>>M USD}\\[6pt]
-    {\color{graydark} EBITDA must not fall below Total Debt / 3.0: the borrower is already 1\% short.}
-  };
-  \node[box, fill=bluebg, draw=bluemain, line width=1.1pt, text width=5.3cm] (verify) at (13.9, -4.55) {
-    {\bfseries\normalsize\color{bluemain} Verify once, reuse every quarter}\\[6pt]
-    {\bfseries Prove.} Z3 checks the formula once, for every possible certificate: against a reference reading, or
-    against a second, independent formalizer.\\[5pt]
-    {\bfseries Run.} Verified covenants are checked automatically every quarter: exact, repeatable, milliseconds.\\[5pt]
-    {\bfseries Escalate.} Covenants whose formulas disagree go to an analyst.
-  };
+  % ================================================================ (a) clause, certificate, questions
+  \node[block, fill=white] (cl) at (0.3,-0.35) {\hspace*{0.75cm}Covenant clause};
+  \node at ($(cl.west)+(0.5,0)$) {\ico{\faFileContract}};
+  \node[inset, minimum width=4.45cm, minimum height=3.55cm] (c1) at (0.85,-1.6) {};
+  \draw[tie] (0.62,-1.3) |- (c1.west);
+  \node[listing, text width=3.95cm] at (0.97,-1.72) {%
+    \fontsize{7.0}{9.0}\selectfont\itshape
+    \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
+    \lno{1} & <<COMPANY>> (<<YEAR>>), \S\,7.9\\
+    \lno{2} & (a) a Senior Debt to EBITDA\\
+    \lno{3} & \ \ Ratio of not more than 2.5 to 1.0.\\
+    \lno{4} & (b) a Total Debt to EBITDA\\
+    \lno{5} & \ \ Ratio of not more than 3.0 to 1.0.\\
+    \lno{6} & (c) a Fixed Charge Coverage Ratio\\
+    \lno{7} & \ \ of not less than 1.0 to 1.0.\\
+    \lno{8} & (d) a Fixed Charge Ratio of not\\
+    \lno{9} & \ \ less than 1.25 to 1.0.
+    \end{tabular}};
 
-  % ---------------------------------------------------------------- arrows
-  \draw[flow] (clause.east |- direct.west) -- (direct.west);
-  \draw[flow] (questions.east |- ours.west) -- (ours.west);
-  \draw[<->, line width=1.1pt, color=redstrong] (direct.east) -- (reference.west |- direct.east)
-       node[midway, above=2pt, font=\LARGE] {\ding{55}};
-  \draw[->, line width=1.1pt, color=bluemain] (ours.east |- verify.west) -- (verify.west);
+  \node[block, fill=white] (ce) at (0.3,-5.65) {\hspace*{0.75cm}Compliance certificate};
+  \node at ($(ce.west)+(0.5,0)$) {\ico{\faFileInvoiceDollar}};
+  \node[inset, minimum width=4.45cm, minimum height=2.3cm] (c2) at (0.85,-6.9) {};
+  \draw[tie] (0.62,-6.6) |- (c2.west);
+  \node[listing, text width=3.95cm] at (0.97,-7.02) {%
+    \fontsize{7.4}{9.2}\selectfont
+    \begin{tabular}{@{}r@{\hspace{5pt}}l@{\hspace{8pt}}r@{}}
+    \lno{1} & Test date & <<DATE>>\\
+    \lno{2} & EBITDA & \$<<EBITDA>>M\\
+    \lno{3} & Senior debt & \$<<SENIOR>>M\\
+    \lno{4} & Total debt & \$<<TOTAL>>M\\
+    \lno{5} & \multicolumn{2}{l}{+ two fixed-charge items}
+    \end{tabular}};
 
-  % ---------------------------------------------------------------- (c) analysis
-  \node[head] at (20.3, 0) {(c) Headroom accuracy};
-  \node[anchor=west, note] at (20.3, -0.5) {143 clauses from borrowers never seen in training};
-  \begin{axis}[
-      at={(21.2cm, -8.6cm)}, anchor=south west, width=6.9cm, height=8.4cm,
-      ybar, bar width=0.55cm, ymin=0, ymax=108, ytick={0,20,40,60,80,100},
-      ylabel={Earnings cushion correct (\%)}, ylabel style={font=\small},
-      symbolic x coords={q7,q32,q27,ours}, xtick={q7,q32,q27,ours},
-      xticklabels={{Qwen\\7B}, {Qwen\\32B}, {Qwen3.8\\27B}, {\textbf{Ours}\\\textbf{7B}}},
-      xticklabel style={align=center, font=\footnotesize}, yticklabel style={font=\footnotesize},
-      axis x line*=bottom, axis y line*=left, enlarge x limits=0.13, tick align=outside,
-      nodes near coords, nodes near coords style={font=\footnotesize, color=ink},
-    ]
-    \addplot[bar shift=0pt, fill=redone, draw=black, postaction={pattern=north east lines}] coordinates {(q7,<<C7>>)};
-    \addplot[bar shift=0pt, fill=redtwo, draw=black, postaction={pattern=north east lines}] coordinates {(q32,<<C32>>)};
-    \addplot[bar shift=0pt, fill=redstrong, draw=black, postaction={pattern=north east lines}] coordinates {(q27,<<C27>>)};
-    \addplot[bar shift=0pt, fill=bluemain, draw=black, nodes near coords style={font=\footnotesize\bfseries}]
-      coordinates {(ours,<<COURS>>)};
-  \end{axis}
-  \node[anchor=west, note, font=\footnotesize] at (20.3, -10.05)
-       {Hatched: reads the clause directly. Solid: formalizes, then Z3.};
-  \node[anchor=west, note, font=\footnotesize] at (20.3, -10.5)
-       {Overall score: ours <<SOURS>>, Qwen3.8 27B <<S27>>, Qwen 32B <<S32>>, Qwen 7B <<S7>>};
+  \node[block, fill=white] (qs) at (0.3,-9.6) {\hspace*{0.75cm}Three questions};
+  \node at ($(qs.west)+(0.5,0)$) {\ico{\faQuestionCircle}};
+  \node[inset, minimum width=4.45cm, minimum height=0.75cm] (c3) at (0.85,-10.85) {};
+  \draw[tie] (0.62,-10.55) |- (c3.west);
+  % three equal-width tags spread evenly across the card (inner span 1.05--5.1)
+  \foreach \q [count=\j] in {status, cushion, capacity}
+    \node[tag, minimum width=1.23cm, align=center] at ({1.05 + 0.615 + (\j-1)*1.41}, -11.225) {\q};
+
+  % ================================================================ (b) by hand
+  \node[block, fill=white] (an) at (\R+0.3,-0.35) {\hspace*{0.75cm}Credit analyst};
+  \node at ($(an.west)+(0.5,0)$) {\ico{\faUserTie}};
+  \node[lab, anchor=west] at (\R+5.05,-0.83) {works through each covenant by hand,\\for every loan and every quarter};
+  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.85cm] (h1) at (\R+0.85,-1.6) {};
+  \draw[tie] (\R+0.62,-1.3) |- (h1.west);
+  \node[mstep] (m1) at (\R+1.05,-2.025) {1\ \ read the clause};
+  \node[mstep] (m2) at ($(m1.east)+(0.45,0)$) {2\ \ compute each ratio};
+  \node[mstep] (m3) at ($(m2.east)+(0.45,0)$) {3\ \ solve for cushion, capacity};
+  \draw[flow] (m1.east) -- (m2.west);
+  \draw[flow] (m2.east) -- (m3.west);
+
+  % ================================================================ (c) reading directly
+  \node[block, fill=white] (rd) at (\R+0.3,\Bt-0.35) {\hspace*{0.75cm}7B model reads};
+  \node at ($(rd.west)+(0.5,0)$) {\ico{\faRobot}};
+  \node[lab, anchor=west] at (\R+5.05,\Bt-0.83) {reasons over clause and figures in text,\\again for every certificate};
+  \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=0.85cm] (b1) at (\R+0.85,\Bt-1.6) {};
+  \draw[tie] (\R+0.62,\Bt-1.3) |- (b1.west);
+  \node[chipfill=good, anchor=west] (s1) at (\R+1.05,\Bt-2.025) {status: <<D7STATUS>>\ \ok};
+  \node[chipfill=bad, anchor=west] (s2) at ($(s1.east)+(0.2,0)$) {cushion: <<D7CUSHION>>\ \no\ \ (true <<RCUSHION>>)};
+  \node[chipfill=good, anchor=west] at ($(s2.east)+(0.2,0)$) {capacity: <<D7CAPACITY>>M USD\ \ok};
+
+  % ================================================================ (d) formalize, then solve
+  \node[block, fill=white] (af) at (\R+0.3,\Ct-0.35) {\hspace*{0.75cm}AutoFormalizer (7B)};
+  \node at ($(af.west)+(0.5,0)$) {\ico{\faServer}};
+  \node[inset, minimum width=5.85cm, minimum height=2.75cm] (f1) at (\R+0.85,\Ct-1.6) {};
+  \draw[tie] (\R+0.62,\Ct-1.3) |- (f1.west);
+  \node[listing, text width=5.35cm] at (\R+0.97,\Ct-1.72) {%
+    \fontsize{6.6}{8.6}\selectfont\ttfamily
+    \begin{tabular}{@{}r@{\hspace{5pt}}l@{}}
+    \lno{1} & (define-fun covenant\_holds\\
+    \lno{2} & \ \ ((ebitda Real) (senior\_debt Real)\\
+    \lno{3} & \ \ \ (total\_debt Real) ... (test\_date Int))\\
+    \lno{4} & \ \ Bool\\
+    \lno{5} & \ \ (and (<= (/ senior\_debt ebitda) 2.5)\\
+    \lno{6} & \ \ \ \ \ \ \ (<= (/ total\_debt ebitda) 3.0)\\
+    \lno{7} & \ \ \ \ \ \ \ ...))
+    \end{tabular}};
+
+  \node[block, fill=sky, minimum width=3.75cm] (z3) at (\R+6.95,\Ct-0.35) {\hspace*{0.75cm}Z3 solver};
+  \node at ($(z3.west)+(0.5,0)$) {\ico{\faCogs}};
+  \draw[flow] (af.east) -- node[lab, above=1pt] {formula, once} (z3.west);
+  \node[inset, minimum width=3.2cm, minimum height=2.75cm] (z1) at (\R+7.5,\Ct-1.6) {};
+  \draw[tie] (\R+7.27,\Ct-1.3) |- (z1.west);
+  \node[anchor=north west, font=\fontsize{8}{10}\selectfont\bfseries, align=left] at (\R+7.65,\Ct-1.75)
+       {every quarter:};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-2.5) {status: <<OSTATUS>>\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.15) {cushion: <<OCUSHION>>\ \ok};
+  \node[chipfill=good, anchor=west] at (\R+7.65,\Ct-3.8) {capacity: <<OCAPACITY>>M USD\ \ok};
+
+  % ================================================================ inputs to (b), (c) and (d)
+  \draw[flow] (\P,-0.825) -- node[lab, above=1pt, align=center] {clause\\+ figures} (an.west);
+  \draw[flow] (\P,\Bt-0.825) -- node[lab, above=1pt, align=center] {clause\\+ figures} (rd.west);
+  \draw[flow] (\P,\Ct-0.825) -- node[lab, above=1pt] {clause} (af.west);
+
+  \begin{pgfonlayer}{page}
+    \fill[white] ([shift={(-6pt,-6pt)}]current bounding box.south west) rectangle ([shift={(6pt,6pt)}]current bounding box.north east);
+  \end{pgfonlayer}
 \end{tikzpicture}
 \end{document}
 """
@@ -880,7 +887,7 @@ def fig_overview_tex():
         'DATE': dt.date(d // 10000, d // 100 % 100, d % 100).strftime('%b %-d, %Y'),
         'EBITDA': f"{vals['ebitda'] / 1e6:,.1f}", 'SENIOR': f"{vals['senior_debt'] / 1e6:,.1f}",
         'TOTAL': f"{vals['total_debt'] / 1e6:,.1f}",
-        'D7STATUS': d7['status'], 'D7CUSHION': pc(d7['cushion']),
+        'D7STATUS': d7['status'], 'D7CUSHION': pc(d7['cushion']), 'D7CAPACITY': f"{d7['capacity'] / 1e6:+,.2f}",
         'OSTATUS': ours['status'], 'OCUSHION': pc(ours['cushion']), 'OCAPACITY': f"{ours['capacity'] / 1e6:+,.2f}",
         'RSTATUS': ref['status'], 'RCUSHION': pc(ref['cushion']), 'RCAPACITY': f"{ref['capacity'] / 1e6:+,.2f}",
         'C7': f"{100 * S['qwen7b']['cushion']:.1f}", 'C32': f"{100 * S['qwen32b']['cushion']:.1f}",
@@ -888,7 +895,11 @@ def fig_overview_tex():
         'SOURS': f"{100 * S['rl_v2']['score']:.1f}",
         'S27': f"{100 * S['qwen27b']['score']:.1f}", 'S32': f"{100 * S['qwen32b']['score']:.1f}",
         'S7': f"{100 * S['qwen7b']['score']:.1f}"}
-    out = TIKZ_OVERVIEW
+    out = ('% Fig. 0 (overview). Generated by src/headroom/paper.py (fig_overview_tex); numbers from the result files.\n'
+           + TIKZ_METHOD[TIKZ_METHOD.index('\\documentclass'):TIKZ_METHOD.index('\\begin{document}')]
+               .replace('<<ICON_CHECK>>', str(Path(__file__).resolve().parent / 'assets' / 'check_mark_button.pdf'))
+               .replace('<<ICON_CROSS>>', str(Path(__file__).resolve().parent / 'assets' / 'cross_mark.pdf'))
+           + TIKZ_OVERVIEW)
     for k, v in fill.items():
         out = out.replace(f'<<{k}>>', v)
     assert '<<' not in out, 'unfilled placeholder'
@@ -912,6 +923,7 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
 \renewcommand{\theta}{\text{\fontencoding{LGR}\selectfont\upshape j}}  % italic theta looks like a 9
 \usepackage{pifont}
 \usepackage{fontawesome5}
+\usepackage{graphicx}
 \usetikzlibrary{arrows.meta,backgrounds,calc}
 \pgfdeclarelayer{page}\pgfsetlayers{page,background,main}
 \definecolor{ink}{HTML}{23302D}
@@ -926,7 +938,11 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
 \definecolor{bad}{HTML}{C0453F}
 \definecolor{amber}{HTML}{B7791F}
 \definecolor{muted}{HTML}{65706D}
-\newcommand{\yes}{{\color{good}\ding{51}}}
+\newcommand{\ok}{\raisebox{-0.12ex}{{\color{good!75!black}\fontsize{9.5}{9.5}\selectfont\faCheckCircle}}}
+\newcommand{\no}{\raisebox{-0.12ex}{{\color{bad!75!black}\fontsize{9.5}{9.5}\selectfont\faTimesCircle}}}
+\newcommand{\okc}{\raisebox{-0.22ex}{\includegraphics[height=1.15em]{<<ICON_CHECK>>}}}
+\newcommand{\noc}{\raisebox{-0.22ex}{\includegraphics[height=1.15em]{<<ICON_CROSS>>}}}
+\newcommand{\yes}{\okc}
 \newcommand{\ico}[2][ink]{{\color{#1}\fontsize{12}{12}\selectfont #2}}
 
 \begin{document}
@@ -944,7 +960,8 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
     chipfill/.style={draw=#1, fill=#1!12, text=#1, rounded corners=1.8pt, line width=0.6pt, inner xsep=4pt, inner ysep=1.6pt,
                  font=\fontsize{7.3}{8}\selectfont},
     tag/.style={draw=ink!45, fill=ink!7, text=ink, rounded corners=1.8pt, line width=0.5pt, inner xsep=2pt,
-                inner ysep=1.3pt, minimum width=0.8cm, text height=1.6ex, text depth=0.25ex, font=\fontsize{6.8}{8}\selectfont},
+                inner ysep=1.3pt, minimum width=1.0cm, align=center, text height=1.6ex, text depth=0.25ex,
+                font=\fontsize{6.8}{8}\selectfont},
     lab/.style={font=\fontsize{8}{9.5}\selectfont, color=black, align=left},
     flow/.style={->, line width=0.7pt, color=ink, rounded corners=4pt},
     tie/.style={line width=0.6pt, color=ink, rounded corners=4pt},
@@ -975,18 +992,18 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
     \yes\ semantic review agrees\\[1pt]
     \yes\ parameters grounded};
   \draw[tie] (\L+0.62,-1.3) |- (t1.west);
-  \node[block, fill=cream] (sft) at (\L+0.3,-4.7) {\phantom{x}SFT};
+  \node[block, fill=mint] (sft) at (\L+0.3,-4.7) {\phantom{x}SFT};
   \node at ($(sft.west)+(0.5,0)$) {\ico{\faGraduationCap}};
   \draw[flow] (\L+0.4,-1.3) -- (\L+0.4,-4.7);
   \node[lab, anchor=west] at (\L+0.55,-4.32) {filtered pairs $\mathcal{D}$};
   \node[inset, minimum height=2.35cm] (t2) at (\L+0.85,-6.05) {};
   \node[itext] at (\L+1.0,-6.2) {{\bfseries\boldmath $(x,\varphi)\in\mathcal{D}$}};
   \node[tag, anchor=base west] at (\L+0.98,-6.84) {clause};
-  \node[anchor=base west, text width=2.72cm, align=left, inner sep=0pt, font=\fontsize{7.3}{8.8}\selectfont\itshape]
-       at (\L+1.88,-6.84) {``Total Debt to EBITDA\\\mbox{\ldots\,not more than $t$ to 1''}};
+  \node[anchor=base west, text width=2.6cm, align=left, inner sep=0pt, font=\fontsize{7.0}{8.6}\selectfont\itshape]
+       at (\L+2.06,-6.84) {``Total Debt to EBITDA\\\mbox{\ldots\,not more than $t$ to 1''}};
   \node[tag, anchor=base west] at (\L+0.98,-7.6) {SMT};
-  \node[anchor=base west, inner sep=0pt, font=\fontfamily{lmvtt}\fontsize{7.4}{9}\selectfont]
-       at (\L+1.88,-7.6) {(<= (/ debt ebitda) $t$)};
+  \node[anchor=base west, inner sep=0pt, font=\fontfamily{lmvtt}\fontsize{6.9}{9}\selectfont]
+       at (\L+2.06,-7.6) {(<= (/ debt ebitda) $t$)};
   \node[anchor=west, font=\fontsize{7.4}{9}\selectfont] at (\L+0.98,-8.02)
        {$\mathcal{L}_{\mathrm{SFT}}=-\,\mathbb{E}_{\mathcal{D}}\log\pi_\theta(\varphi\mid x)$};
   \draw[tie] (\L+0.62,-5.65) |- (t2.west);
@@ -1014,18 +1031,18 @@ TIKZ_METHOD = r"""% Fig. M (method). Generated by src/headroom/paper.py (fig_met
   \node[inset, minimum width={(\W-1.15)*1cm}, minimum height=2.35cm] (g2) at (\L+0.85,-6.05) {};
   \draw[tie] (\L+0.62,-5.65) |- (g2.west);
   \node[itext, text width={(\W-1.45)*1cm}] at (\L+1.0,-6.2) {{\bfseries clause limit}\ \ $\tau\le t$, tested at};
-  \foreach \n/\q/\a/\c/\m [count=\j] in {compliant/(1-\delta)\,t/sat/good/51, boundary/t/sat/good/51, breach/(1+\delta)\,t/unsat/bad/55} {
+  \foreach \n/\q/\a/\c/\m [count=\j] in {compliant/(1-\delta)\,t/SAT/good/\okc, boundary/t/SAT/good/\okc, breach/(1+\delta)\,t/UNSAT/bad/\noc} {
     \pgfmathsetmacro\x{\L+1.95+(\j-1)*1.75}
     \node[font=\fontsize{7.4}{8}\selectfont\bfseries] at (\x,-6.72) {\n};
     \node[font=\fontsize{7.2}{8}\selectfont] at (\x,-7.07) {$\textcolor{mintdark}{\varphi}\wedge\tau=\q$};
-    \node[chipfill=\c] at (\x,-7.48) {\a\ \ding{\m}};
+    \node[chipfill=\c, text=ink] at (\x,-7.48) {\a\ \m};
   }
   \node[anchor=west, font=\fontsize{7.4}{9}\selectfont] at (\L+0.98,-8.04)
        {$\textcolor{skydark}{r(\textcolor{mintdark}{\varphi})}=\mathbf{1}[\textcolor{mintdark}{\varphi}\text{ valid}]\cdot\big(\alpha+(1-\alpha)\,\tfrac{\#\,\text{passed}}{\#\,\text{tests}}\big)$};
 
   % ================================================================ Stage III
   \def\L{\Lc}
-  \node[block, fill=white] (form) at (\L+0.3,-0.35) {\hspace*{0.75cm}AutoFormalizer};
+  \node[block, fill=mint] (form) at (\L+0.3,-0.35) {\hspace*{0.75cm}AutoFormalizer};
   \node at ($(form.west)+(0.5,0)$) {\ico{\faServer}};
   \node[inset, minimum height=2.2cm] (f1) at (\L+0.85,-1.7) {};
   \node[itext] at (\L+1.0,-1.85) {{\bfseries Equivalence check}};
@@ -1066,7 +1083,9 @@ def fig_method_tex():
     """Method figure as TikZ (results/paper/figures/fig_method.tex); symbols only, values are in the paper caption.
     Needs the fontawesome5 LaTeX package."""
     path = FIG / 'fig_method.tex'
-    path.write_text(TIKZ_METHOD)
+    assets = Path(__file__).resolve().parent / 'assets'  # Microsoft Fluent Emoji, MIT (assets/ICONS_LICENSE.txt)
+    path.write_text(TIKZ_METHOD.replace('<<ICON_CHECK>>', str(assets / 'check_mark_button.pdf'))
+                               .replace('<<ICON_CROSS>>', str(assets / 'cross_mark.pdf')))
     return compile_tex(path)
 
 
