@@ -66,5 +66,37 @@ def build():
     print(json.dumps(summary, indent=1))
 
 
+def build_v3():
+    """Reward v3 pool: the v2 clauses plus those with date schedules or condition flags, which the schedule-aware reward
+    (exec_reward.score_spec) can now score. Same checks as build(); each row keeps reader A's spec for the reward."""
+    a = {json.loads(l)['id']: json.loads(l) for l in open(OUT / 'reader_a.jsonl')}
+    out_dir = P.RL_DATA / 'rl_v3'
+    out_dir.mkdir(exist_ok=True)
+    keep, why = [], Counter()
+    for c in pool():
+        s = (a.get(c['id']) or {}).get('spec')
+        if not s or not s.get('supported'):
+            why['unsupported or unparseable'] += 1
+            continue
+        try:
+            reason = bs.check_spec(s, c['text'])
+        except (KeyError, TypeError, ValueError):
+            reason = 'malformed spec'
+        if reason and not reason.startswith(('no earnings or debt item', 'earnings/debt item', 'more than one earnings')):
+            why[reason.split(' (')[0][:50]] += 1
+            continue
+        sched = bool(s.get('flags')) or any(len(l['schedule']) != 1 or l['schedule'][0].get('to') for l in s['limits'])
+        why['kept, schedule or flag' if sched else 'kept, as in v2'] += 1
+        spec = dict(items=s['items'], flags=s.get('flags', []) if sched else [], limits=s['limits'])
+        keep.append(dict(id=c['id'], contract_id=c['contract_id'], text=c['text'],
+                         prompt=[{'role': 'system', 'content': SYSTEM},
+                                 {'role': 'user', 'content': PROMPT.format(clause=c['text'].strip(), params=params_text(spec))}],
+                         params=[list(p) for p in hr.params(spec)], spec_json=json.dumps(spec), schedule_or_flag=sched))
+    (out_dir / 'pool.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in keep))
+    summary = dict(pool=len(pool()), kept=len(keep), breakdown=dict(why.most_common()))
+    (out_dir / 'pool_summary.json').write_text(json.dumps(summary, indent=1))
+    print(json.dumps(summary, indent=1))
+
+
 if __name__ == '__main__':
-    {'read': read, 'build': build}[sys.argv[1]]()
+    {'read': read, 'build': build, 'build_v3': build_v3}[sys.argv[1]]()

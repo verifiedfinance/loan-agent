@@ -30,7 +30,7 @@ def main():
         items = [dict(case_id=k, clause_id=by[k]['clause_id'], messages=[{'role': 'system', 'content': rd.SYSTEM},
                  {'role': 'user', 'content': rd.prompt(by[k], specs[by[k]['clause_id']]['text'])}]) for k in cut]
         tok, mdl = wf.load(model)
-        wf.run(tok, mdl, model, items, raw, 8, 4096, 8192)
+        wf.run(tok, mdl, model, items, raw, max(1, int(__import__('os').environ.get('READER_BATCH', 16)) // 2), 4096, 8192)  # 8 by default; halves READER_BATCH
     new = {json.loads(l)['case_id']: json.loads(l) for l in open(raw)} if raw.exists() else {}
     with open(out_dir / f'direct_{name}.jsonl', 'w') as h:
         for r in rows:

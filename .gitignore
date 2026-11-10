@@ -10,8 +10,12 @@ models/
 
 # internal notes, not published
 docs/MIGRATION.md
-# paper draft, kept out of the repository
+docs/advisor_brief.txt
+docs/background_covenants.txt
+docs/fig_overview.svg
+# paper drafts, kept out of the repository
 paper/
+paper_pakdd/
 # experiment outputs, kept out of the repository
 results/
 # run logs, kept out of the repository
