@@ -67,11 +67,17 @@ def comparison_atoms(h):
                 c = _scaled(rhs)
                 if c is not None:
                     y = rhs.arg(1) if _const(rhs.arg(0)) is not None else rhs.arg(0)
-                    term = lhs / y
+                    try:
+                        term = lhs / y
+                    except z3.Z3Exception:  # ill-sorted division in a sampled formula: not a limit atom
+                        return
                 elif _scaled(lhs) is not None:
                     c, op = _scaled(lhs), FLIP[op]
                     y = lhs.arg(1) if _const(lhs.arg(0)) is not None else lhs.arg(0)
-                    term = rhs / y
+                    try:
+                        term = rhs / y
+                    except z3.Z3Exception:
+                        return
             if c is not None and _const(term) is None:
                 eff = None if pol is None else (op if pol else NEGATE[op])
                 key = (e.get_id(), eff)
@@ -115,9 +121,10 @@ def _real(v):
     return z3.RealVal(f'{v.numerator}/{v.denominator}')
 
 
-def score(text, smt2, status_facts='', extra_constraints=None):
+def score(text, smt2, status_facts='', extra_constraints=None, anchors=None):
     out = dict(score=None, scenarios=0, passed=0, anchors=0, matched=0, error='', details=[])
-    anchors = sorted({(a['op'], Fraction(str(a['threshold']))) for a in extract(text)}, key=lambda x: (x[1], x[0]))
+    if anchors is None:  # default: limits read from the clause text by the deterministic rules
+        anchors = sorted({(a['op'], Fraction(str(a['threshold']))) for a in extract(text)}, key=lambda x: (x[1], x[0]))
     out['anchors'] = len(anchors)
     if not anchors:
         return out
@@ -177,6 +184,72 @@ def score(text, smt2, status_facts='', extra_constraints=None):
     return out
 
 
+# ------------------------------------------------------------------ schedules and conditions (reward v3)
+def _date_int(d):
+    return int(str(d).replace('-', '')[:8])
+
+
+def _window_dates(frm, to):
+    """Test dates spread over a schedule window (YYYYMMDD ints): near its start, its middle and its end. Open ends stand
+    for 1993-03-31 and 2099-12-31, which bracket the benchmark's agreements. Testing several dates stops a formula from
+    passing by switching itself off (e.g. an invented `test_date >= 2012` guard) at dates the reward never checks."""
+    import datetime as dt
+    as_date = lambda v: dt.date(v // 10000, v // 100 % 100, v % 100)
+    to_int = lambda d: d.year * 10000 + d.month * 100 + d.day
+    a = as_date(_date_int(frm)) if frm else dt.date(1993, 3, 31)
+    b = as_date(_date_int(to)) if to else dt.date(2099, 12, 31)
+    if b <= a:
+        return [to_int(a)]
+    step = dt.timedelta(days=min(31, (b - a).days // 4 or 1))
+    return sorted({to_int(a + step), to_int(a + (b - a) / 2), to_int(b - step)})
+
+
+def scenarios(spec):
+    """(test_date, {flag: value}) settings that make each schedule step and condition of the spec apply, with several
+    test dates per schedule window. Each setting lists the limits (op, threshold) in force under it. A clause without
+    schedules is tested at dates from 1993 to 2099, since its limits must hold the same way at any date."""
+    import itertools
+    flags = [f['name'] for f in spec.get('flags', [])]
+    combos = [dict(zip(flags, v)) for v in itertools.product([False, True], repeat=len(flags))] if len(flags) <= 3 else \
+             [{f: False for f in flags}] + [{**{f: False for f in flags}, g: True} for g in flags]
+    dates = sorted({d for l in spec['limits'] for st in l['schedule'] for d in _window_dates(st.get('from'), st.get('to'))})
+    out = []
+    for d in dates:
+        for fl in (combos or [{}]):
+            anchors = set()
+            for l in spec['limits']:
+                w = l.get('when')
+                if w and fl.get(w['flag']) != bool(w['value']):
+                    continue
+                for st in l['schedule']:
+                    lo = _date_int(st['from']) if st.get('from') else 0
+                    hi = _date_int(st['to']) if st.get('to') else 99999999
+                    if lo <= d <= hi:
+                        anchors.add((l['op'], Fraction(str(st['threshold']))))
+            if anchors:
+                out.append((d, fl, sorted(anchors, key=lambda x: (x[1], x[0]))))
+    return out
+
+
+def score_spec(text, smt2, spec):
+    """Execution score over every schedule window and condition setting of the clause (reward v3): the same three tests
+    per limit as score(), run with test_date inside the window and the condition flags set so that the limit applies.
+    The windows and conditions come from the teacher's reading of the clause (spec); the thresholds are checked in the
+    clause text when the RL pool is built. Unlike the v2 reward, which fixes test_date to 2099-12-31, every clause is
+    tested at several dates (see _window_dates)."""
+    total = passed = 0
+    details = []
+    for d, fl, anchors in scenarios(spec):
+        extra = [z3.Int('test_date') == d] + [z3.Bool(f) == v for f, v in fl.items()]
+        r = score(text, smt2, '', extra, anchors=anchors)
+        if r['score'] is None and r['error']:
+            return dict(score=0.0, scenarios=0, passed=0, error=r['error'], details=[r['error']])
+        total += r['scenarios']
+        passed += r['passed']
+        details += [f'{d} {fl}: {x}' for x in r['details']]
+    return dict(score=passed / total if total else None, scenarios=total, passed=passed, error='', details=details)
+
+
 # ------------------------------------------------------------------ fixed binder (GPU; used during training)
 STANDARD_STATE = (
     'Status at the observation date: the credit agreement is in force; Commitments, Loans and Letters of Credit are '
@@ -205,7 +278,8 @@ class Binder:
     def __init__(self, model='Qwen/Qwen2.5-Coder-7B-Instruct', max_new_tokens=256, device='cuda'):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
-        self.tok = AutoTokenizer.from_pretrained(model, padding_side='left')
+        from lora_utils import load_tokenizer
+        self.tok = load_tokenizer(model, padding_side='left')
         if self.tok.pad_token_id is None:
             self.tok.pad_token = self.tok.eos_token
         self.model = AutoModelForCausalLM.from_pretrained(model, dtype=torch.bfloat16).to(device).eval()

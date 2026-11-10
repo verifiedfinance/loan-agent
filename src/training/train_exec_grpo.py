@@ -31,9 +31,12 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--model', type=Path, required=True, help='SFT adapter to start from')
     p.add_argument('--data', type=Path, required=True)
-    p.add_argument('--reward', choices=['validity', 'exec', 'exec_sig'], required=True,
+    p.add_argument('--reward', choices=['validity', 'exec', 'exec_sig', 'exec_bin', 'exec_sched'], required=True,
                    help='exec_sig: headroom RL v2 (docs/headroom_PLAN.md) - 0 unless the formula is valid and keeps exactly '
-                        'the required parameters (row "params"), else 0.3 + 0.7 x execution score with test_date fixed late')
+                        'the required parameters (row "params"), else 0.3 + 0.7 x execution score with test_date fixed late. '
+                        'exec_bin: ablation of exec_sig - same gate and tests, but 1 only if every test passes, else 0. '
+                        'exec_sched: exec_sig run over every schedule window and condition setting of the clause '
+                        '(row "spec_json", data/rl/rl_v3); identical to exec_sig on clauses without either')
     p.add_argument('--output-dir', type=Path, required=True)
     p.add_argument('--max-steps', type=int, default=1000)
     p.add_argument('--learning-rate', type=float, default=5e-6)
@@ -57,24 +60,25 @@ def main():
 
     data = load_dataset('json', data_files=str(args.data), split='train')
     for row in data:
-        if args.reward != 'exec_sig' and row['prompt'] != student_prompt(row):
+        if args.reward not in ('exec_sig', 'exec_bin', 'exec_sched') and row['prompt'] != student_prompt(row):
             raise ValueError(f'prompt does not match the parameter-comment student prompt: {row["id"]}')
     heldout = [json.loads(l) for l in args.eval_data.read_text().splitlines() if l.strip()]
     rows = list(data)
     indices = training_indices(rows, heldout)
     excluded = [r['id'] for i, r in enumerate(rows) if i not in set(indices)]
     data = data.select(indices)
-    tokenizer = AutoTokenizer.from_pretrained(str(args.model), padding_side='left')
+    from lora_utils import load_tokenizer  # DeepSeek-Coder: tokenizer that round-trips spaces and newlines
+    tokenizer = load_tokenizer(str(args.model), padding_side='left')
     data = data.filter(lambda row: len(tokenizer.apply_chat_template(
         row['prompt'], tokenize=True, return_dict=False, add_generation_prompt=True)) <= 3072)
     print(f'{len(data)} training prompts ({len(excluded)} excluded as related to held-out clauses)', flush=True)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     text_of = lambda c: c[0]['content'] if isinstance(c, list) else c
-    if args.reward == 'exec_sig':
+    if args.reward in ('exec_sig', 'exec_bin', 'exec_sched'):
         import re
         import z3
-        from exec_reward import score
+        from exec_reward import score, score_spec
         exec_log = args.output_dir / 'exec_rewards.jsonl'
         args.output_dir.mkdir(parents=True, exist_ok=True)
         exec_log.write_text('')
@@ -107,11 +111,12 @@ def main():
                         out.append(0.0)
                         handle.write(json.dumps({'id': kwargs['id'][i], 'valid_signature': False, 'reward': 0.0}) + '\n')
                         continue
-                    r = score(t, smt, '', [z3.Int('test_date') == 20991231])
+                    r = (score_spec(t, smt, json.loads(kwargs['spec_json'][i])) if args.reward == 'exec_sched'
+                         else score(t, smt, '', [z3.Int('test_date') == 20991231]))
                     x = 1.0 if r['score'] is None else r['score']
-                    out.append(0.3 + 0.7 * x)
+                    out.append(float(x == 1.0) if args.reward == 'exec_bin' else 0.3 + 0.7 * x)
                     handle.write(json.dumps({'id': kwargs['id'][i], 'valid_signature': True, 'exec': r['score'],
-                                             'anchors': r['anchors'], 'matched': r['matched'], 'reward': out[-1]}) + '\n')
+                                             'anchors': r.get('anchors'), 'matched': r.get('matched'), 'reward': out[-1]}) + '\n')
             return out
         binder = None
     elif args.reward == 'validity':
