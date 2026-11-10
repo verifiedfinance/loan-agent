@@ -1,13 +1,13 @@
-# FormaFin: Training Small Open Models to Verify LLM Financial Analyses with Symbolic Feedback
+# FormaFin: Verifying LLM Financial Analyses with Solver-Rewarded Small Open Models
 
 Financial analyses often apply a written rule to reported figures: a lender tests a borrower's quarterly figures
 against the covenants of its loan agreement. These checks must be exact and auditable, and the data are confidential,
 so they call for small open models run in-house. FormaFin trains such a model to **formalize** each rule once into an
 SMT formula that captures its thresholds, date schedules and conditions. The Z3 solver then answers every question
-exactly, checks any LLM's analysis against the formula, and proves properties of the formula itself. Training needs no
-human labels: distillation from a teacher, then GRPO with a reward that Z3 derives from the limits each rule states,
-then trust through proven agreement between two independently trained formalizers. Case study: loan covenant
-monitoring on CovenantBench.
+exactly, checks any LLM's analysis against the formula, and can prove that two formulas are equivalent. Training needs
+no human labels: distillation from a teacher, then GRPO with a reward that Z3 derives from the limits each rule states.
+In deployment, a formula is used without review only when Z3 proves that two independently trained models produced
+equivalent formulas. Case study: loan covenant monitoring on CovenantBench.
 
 ![Overview: the quarterly covenant check done by hand, by a model reading the clause directly, and by formalizing once and solving with Z3](docs/fig_overview.png)
 
@@ -39,9 +39,11 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
   proprietary model's) are caught, and the accepted answers are 99-99.9% correct.
 - **Provable without labels.** 81% of the formulas are proven correct by Z3 for every possible certificate; where two
   independently trained formalizers provably agree (92% of clauses), they are right 98.4% of the time.
-- **The reward must constrain every input.** Without the interface gate, or with tests at a single test date, the
-  policy learns to exploit the gap; the final reward tests every limit in every date window, condition and several
-  test dates.
+- **The reward must test what the model could get wrong.** Without the parameter-list gate, the model dropped the test
+  date from covenants that do not use it, so the formulas could not be run each quarter (58.4%). When the reward tested
+  every covenant only at a date in 2099, one run switched covenants off before 2012, a date in no contract (41.8%). The
+  final reward rejects formulas with the wrong inputs and tests every limit at several dates, in every schedule window
+  and condition; the second run then reaches 96.9%.
 
 ## Repository layout
 
