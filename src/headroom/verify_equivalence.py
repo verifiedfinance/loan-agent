@@ -1,7 +1,7 @@
 """Formal verification of each generated formula against the reference reading (PLAN.md, added 2026-11-06 evening).
 
 For every clause and system, Z3 checks whether the model's covenant_holds and the reference's are equivalent for ALL
-inputs in the domain: every line item > 0, every reference ratio denominator > 0, test_date between 1990-01-01 and
+inputs in the domain: every line item > 0, every reference ratio denominator > 0, test_date a calendar date between 1990-01-01 and
 2030-12-31, flags free. unsat of (model != reference) = verified equivalent; sat = a counterexample exists (printed);
 unknown = undecided (timeout).
 
@@ -30,9 +30,18 @@ def holds_expr(formula, spec):
     return ev.holds[0] if len(ev.holds) == 1 else z3.And(*ev.holds), ev.const
 
 
+def calendar_date(td):
+    """Constraints that make the YYYYMMDD integer td a real calendar date. Without them Z3 may return counterexamples
+    such as 19971232 (December 32), which fall between the windows of a date schedule and never occur in practice."""
+    y, m, d = td / 10000, (td / 100) % 100, td % 100  # integer division and remainder (linear integer arithmetic)
+    leap = z3.And(y % 4 == 0, z3.Or(y % 100 != 0, y % 400 == 0))
+    last = z3.If(m == 2, z3.If(leap, 29, 28), z3.If(z3.Or(m == 4, m == 6, m == 9, m == 11), 30, 31))
+    return [m >= 1, m <= 12, d >= 1, d <= last]
+
+
 def domain(spec, const):
     d = [const[i['name']] > 0 for i in spec['items']]
-    d += [const['test_date'] >= 19900101, const['test_date'] <= 20301231]
+    d += [const['test_date'] >= 19900101, const['test_date'] <= 20301231] + calendar_date(const['test_date'])
     for lim in spec['limits']:
         if lim['denominator']:
             d.append(z3.Sum([const[i] * s for i, s in lim['denominator']]) > 0)

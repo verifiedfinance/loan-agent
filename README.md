@@ -37,7 +37,7 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
   up to 42 points exactly when the borrower is in breach.
 - **Verifies LLM analyses.** Checked against FormaFin's formulas, 98-99.7% of the errors of open LLMs (and 95.6% of a
   proprietary model's) are caught, and the accepted answers are 99-99.9% correct.
-- **Provable without labels.** 74% of the formulas are proven correct by Z3 for every possible certificate; where two
+- **Provable without labels.** 81% of the formulas are proven correct by Z3 for every possible certificate; where two
   independently trained formalizers provably agree (92% of clauses), they are right 98.4% of the time.
 - **The reward must constrain every input.** Without the interface gate, or with tests at a single test date, the
   policy learns to exploit the gap; the final reward tests every limit in every date window, condition and several
