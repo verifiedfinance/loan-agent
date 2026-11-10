@@ -52,7 +52,7 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
 │   ├── data_prep/         # clause extraction, splits, borrower-disjoint test set, RL clause pools
 │   ├── formalization/     # SMT validation, prompts, Z3 decisions, reference extractor
 │   ├── training/          # SFT data generation, SFT, GRPO with the solver-checked rewards
-│   ├── headroom/          # benchmark construction, evaluation, scoring, verification, paper outputs
+│   ├── headroom/          # benchmark construction, evaluation, scoring, verification, tables and figures
 │   ├── common/            # LoRA loading, batched generation
 │   └── verifiqa/          # LLM clients (Claude and Codex command-line tools)
 ├── data/
@@ -63,7 +63,7 @@ of the three questions (status, earnings cushion, debt capacity) answered correc
 │   ├── raw/               # source agreements (not included, see "Data")
 │   └── processed/         # extracted clause records (not included, rebuilt by stage 01)
 ├── models/                # LoRA adapters (not included, see MODELS.md)
-├── notebooks/             # headroom_paper.ipynb: every table and figure
+├── notebooks/             # every table and figure
 ├── docs/                  # data and benchmark construction, pre-registration, data audit
 ├── scripts/               # env.sh, the pipeline stages and the experiments
 └── tests/                 # unit tests
@@ -81,17 +81,17 @@ scripts/02_train_sft.sh          # teacher pairs, then LoRA SFT (GPU)
 scripts/03_build_benchmark.sh    # two-reader references, cases, reference validation
 scripts/04_train_rl.sh           # GRPO with the first, single-date reward (exec_sig), three seeds (GPU)
 scripts/05_evaluate.sh           # readers and formalizers, sensitivity reruns, formal verification, scores
-scripts/09_schedule_reward.sh    # GRPO with the final reward (exec_sched): the paper's FormaFin, three seeds (GPU)
+scripts/09_schedule_reward.sh    # GRPO with the final reward (exec_sched): the final FormaFin model, three seeds (GPU)
 scripts/06_paper.sh              # tables, figures, notebook (CPU)
 
-# experiments reported in the paper
+# further experiments
 scripts/06_binary_ablation.sh    # pass/fail reward ablation
 scripts/07_llama_baseline.sh     # Llama-3.1-8B: reader, prompted, SFT, GRPO (first reward)
 scripts/08_mistral_baseline.sh   # Mistral-7B: reader, prompted, SFT, GRPO (final reward)
 scripts/10_llama_sched.sh        # Llama-3.1-8B GRPO with the final reward
 scripts/12_llama70b_reader.sh    # Llama-3.3-70B reader in 4-bit NF4
 scripts/13_checkpoint_eval.sh    # benchmark score of the GRPO checkpoints at steps 250 / 500 / 750
-scripts/11_deepseek_coder.sh     # DeepSeek-Coder-6.7B (set up, not in the paper)
+scripts/11_deepseek_coder.sh     # DeepSeek-Coder-6.7B (set up only, not evaluated)
 ```
 
 Every stage can be resumed. `queue_*.sh` and `run_after.sh` chain GPU runs on a single machine. Python 3.12 (pinned

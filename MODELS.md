@@ -8,7 +8,7 @@
 | Reference reader B (benchmark construction); direct reader | Qwen/Qwen3.8-27B | 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0 |
 | Direct reader | Qwen/Qwen2.5-Coder-32B-Instruct | from the shared HF cache |
 | Direct reader, loaded in 4-bit NF4 (bitsandbytes) | meta-llama/Llama-3.3-70B-Instruct | 6f6073b423013f6a7d4d9f39144961bfbfbc386b |
-| Set up, not in the paper | deepseek-ai/deepseek-coder-6.7b-instruct | e5d64addd26a6a1db0f9b863abf6ee3141936807 |
+| Set up only, not evaluated | deepseek-ai/deepseek-coder-6.7b-instruct | e5d64addd26a6a1db0f9b863abf6ee3141936807 |
 
 API model (through the `claude` command-line tool): `claude-sonnet-5-5` is the SFT teacher and judge, reference
 reader A, the RL item namer, and one of the LLM analyses checked by FormaFin.
@@ -20,7 +20,7 @@ configuration, `exec_rewards.jsonl` every sampled formula's reward):
 | Folder | What |
 |---|---|
 | `sft789/` | Qwen2.5-Coder-7B, SFT on the 789 teacher pairs (`data/sft/sft_pairs.jsonl`) |
-| `rl_sched_s42/`, `rl_sched_s43/`, `rl_sched_s44/` | **the paper's FormaFin**: SFT + GRPO with the final reward (`exec_sched`, `data/rl/rl_v3`), three seeds |
+| `rl_sched_s42/`, `rl_sched_s43/`, `rl_sched_s44/` | **FormaFin (final model)**: SFT + GRPO with the final reward (`exec_sched`, `data/rl/rl_v3`), three seeds |
 | `rl_v2_s42/`, `rl_v2_s43/`, `rl_v2_s44/` | SFT + GRPO with the first, single-date reward (`exec_sig`, `data/rl/rl_v2`) |
 | `rl_bin_s42/`, `rl_bin_s43/`, `rl_bin_s44/` | ablation: pass/fail reward (`exec_bin`) |
 | `rl_v1/` | SFT + GRPO without the interface gate, old prompt format (reported as a failure) |
