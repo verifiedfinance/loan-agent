@@ -107,7 +107,7 @@ def main():
             {'role': 'system', 'content': SYSTEM}, {'role': 'user', 'content': prompt(c, specs[c['clause_id']]['text'])}]) for c in todo]
         tok, mdl = wf.load(model)
         tmp = out.with_suffix('.raw.jsonl')
-        wf.run(tok, mdl, model, items, tmp, 16, 1024, 8192)
+        wf.run(tok, mdl, model, items, tmp, int(__import__('os').environ.get('READER_BATCH', 16)), 1024, 8192)  # READER_BATCH: smaller batches for the 70B reader if memory runs short
         with open(out, 'a') as h:
             for l in open(tmp):
                 r = json.loads(l)
